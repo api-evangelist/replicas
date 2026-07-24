@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Profile API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Profile
+  description: Read and update the authenticated user's profile
+paths:
+  /v1/user/profile:
+    get:
+      operationId: getUserProfile
+      summary: Get User Profile
+      description: Returns the authenticated user's display name, email, and profile photo.
+      tags:
+      - Profile
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      operationId: updateUserProfile
+      summary: Update User Profile
+      description: Updates the authenticated user's display name and profile photo. Profile photos are uploaded to the configured S3 object store.
+      tags:
+      - Profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                displayName:
+                  type: string
+                  minLength: 1
+                  maxLength: 80
+                avatar:
+                  type: string
+                  format: binary
+                removeAvatar:
+                  type: string
+                  enum:
+                  - 'true'
+              required:
+              - displayName
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    GetUserProfileResponse:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+      required:
+      - profile
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        avatarUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+      required:
+      - displayName
+      - avatarUrl
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+        avatarUrl:
+          type:
+          - string
+          - 'null'
+          format: uri
+      required:
+      - userId
+      - email
+      - displayName
+      - avatarUrl
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

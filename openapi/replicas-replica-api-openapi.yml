@@ -1,0 +1,3401 @@
+openapi: 3.1.0
+info:
+  title: Analytics Replica API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Replica
+  description: Manage replicas (workspaces) for AI agents
+paths:
+  /v1/replica:
+    post:
+      operationId: createReplica
+      summary: Create Replica
+      description: Creates a new replica in your organization and sends an initial message to the coding agent. The workspace and agent are initialized asynchronously.
+      tags:
+      - Replica
+      parameters:
+      - name: X-Replicas-Api-Version
+        in: header
+        description: Optional dated API version. When omitted, the request blocks until the workspace reaches `active` and the response includes the populated engine details (legacy behavior). When set to `2026-05-17`, the request returns immediately with a `preparing` workspace; the initial message is still delivered to the agent in the background. See the [API Versioning](/features/api#api-versioning) section for details.
+        required: false
+        schema:
+          type: string
+          enum:
+          - '2026-05-17'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReplicaRequest'
+      responses:
+        '201':
+          description: Replica created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateReplicaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Repository or repository set not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    get:
+      operationId: listReplicas
+      summary: List Replicas
+      description: Returns a paginated list of all replicas in your organization. Supports filtering by user, source, and status. For this API endpoint, results are ordered by newest `created_at` first, except `status=archived` results are ordered by most recent activity (`last_activity_at`, falling back to `created_at`).
+      tags:
+      - Replica
+      parameters:
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+      - name: limit
+        in: query
+        description: Number of items per page
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 100
+      - name: user_id
+        in: query
+        description: Filter replicas by the user who created them
+        required: false
+        schema:
+          type: string
+      - name: source
+        in: query
+        description: Filter replicas by creation source
+        required: false
+        schema:
+          type: string
+          enum:
+          - api
+          - dashboard
+          - slack
+          - linear
+          - github
+          - gitlab
+          - automation
+      - name: status
+        in: query
+        description: Filter replicas by status
+        required: false
+        schema:
+          type: string
+          enum:
+          - active
+          - sleeping
+          - archived
+          - preparing
+          - error
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListReplicasResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}:
+    get:
+      operationId: getReplica
+      summary: Get Replica
+      description: 'Returns detailed information about a specific replica by its ID. Use the `include` query parameter to request additional data such as environment configuration and diffs. If the workspace is sleeping or archived, it will be woken and the response will indicate this with `waking: true`.'
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: include
+        in: query
+        description: Comma-separated list of additional fields to include in the response
+        required: false
+        schema:
+          type: string
+          example: environment,diffs
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReplicaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+    delete:
+      operationId: deleteReplica
+      summary: Delete Replica
+      description: Deletes a replica by its ID. This terminates the underlying sandbox and processes any outstanding billing.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Replica deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteReplicaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}/messages:
+    post:
+      operationId: sendReplicaMessage
+      summary: Send Message
+      description: Sends a message to an existing replica. Supports targeting a specific chat, choosing a coding agent and model, attaching images, and enabling plan mode.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendReplicaMessageRequest'
+      responses:
+        '200':
+          description: Message accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendReplicaMessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/replica/{id}/chats:
+    get:
+      operationId: listReplicaChats
+      summary: List Chats
+      description: Returns a list of chats for a replica.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chats:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReplicaChat'
+                  waking:
+                    type: boolean
+                    description: If true, the workspace was sleeping or archived and is now waking up. Retry after 30-90 seconds.
+                required:
+                - chats
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createReplicaChat
+      summary: Create Chat
+      description: Creates a new chat session for a replica.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatRequest'
+      responses:
+        '201':
+          description: Chat created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReplicaChat'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}/chats/{chatId}:
+    delete:
+      operationId: deleteReplicaChat
+      summary: Delete Chat
+      description: Deletes a chat session from a replica.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        description: The unique identifier of the chat
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Chat deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                - success
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}/chats/{chatId}/slash-commands:
+    get:
+      operationId: listReplicaSlashCommands
+      summary: List Slash Commands
+      description: Returns built-in Replicas slash commands and agent-provided commands for a chat, including Claude, Codex ASP, Cursor, Opencode, and Pi commands.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        description: The unique identifier of the chat
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlashCommandsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /v1/replica/{id}/chats/{chatId}/queue:
+    get:
+      operationId: getReplicaChatQueue
+      summary: Get Chat Queue
+      description: Returns queued messages for a chat. The currently processing message is not included.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        description: The unique identifier of the chat
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Queue retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatQueueResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: clearReplicaChatQueue
+      summary: Clear Chat Queue
+      description: Removes all queued messages from a chat. The currently processing message is not interrupted.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        description: The unique identifier of the chat
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Queue cleared successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueMutationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}/chats/{chatId}/queue/{messageId}:
+    delete:
+      operationId: removeReplicaChatQueueMessage
+      summary: Remove Queued Message
+      description: Removes one queued message from a chat.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        description: The unique identifier of the chat
+        required: true
+        schema:
+          type: string
+      - name: messageId
+        in: path
+        description: The unique identifier of the queued message
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Queued message removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueMutationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}/chats/{chatId}/queue/reorder:
+    patch:
+      operationId: reorderReplicaChatQueue
+      summary: Reorder Chat Queue
+      description: Moves a queued message to a new zero-based position.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        description: The unique identifier of the chat
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderQueueRequest'
+      responses:
+        '200':
+          description: Queue reordered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/{id}/history:
+    get:
+      operationId: readReplicaHistory
+      summary: Read History
+      description: 'Reads the conversation history for a replica with pagination from the end (bottom-up). Optionally filter by chat ID. If the workspace is sleeping or archived, it will be woken and the response will indicate this with `waking: true`. Retry in 30-90 seconds when waking.'
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chat_id
+        in: query
+        description: Filter history to a specific chat
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Maximum number of events to return
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - name: offset
+        in: query
+        description: Number of events to skip from the end
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadReplicaHistoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /v1/replica/{id}/hooks:
+    get:
+      operationId: getReplicaHooks
+      summary: Get Hook Logs
+      description: Returns the warm hook and start hook execution logs for a replica.
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HooksResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /v1/replica/{id}/canvas:
+    get:
+      operationId: listReplicaCanvasItems
+      summary: List Canvas Items
+      description: 'Lists the items in the replica''s Canvas (files agents drop into `~/.replicas/canvas/`). Each item has a `kind` (markdown, html, image, video, audio, or other) inferred from its extension and a `sizeBytes` measured at list time. Files larger than 5 MB are still listed; the `getReplicaCanvasItem` endpoint will return `tooLarge: true` for them so callers know to fall back to `replicas media upload`.'
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanvasListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /v1/replica/{id}/canvas/{filename}:
+    get:
+      operationId: getReplicaCanvasItem
+      summary: Get Canvas Item
+      description: 'Reads a single Canvas item by filename. Text kinds (`markdown`, `html`) return UTF-8 text in `content`. Binary kinds (`image`, `video`, `audio`, `other`) return base64 in `base64`. Items over the 5 MB per-file cap return `tooLarge: true` with neither payload; callers should reach for `replicas media upload` for those.'
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: filename
+        in: path
+        description: The Canvas item filename, including extension (e.g. `example-plan.md`).
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanvasContentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /v1/replica/{id}/events:
+    get:
+      operationId: streamReplicaEvents
+      summary: Stream Events
+      description: 'Opens a Server-Sent Events (SSE) stream for real-time events from a replica. The connection remains open and events are pushed as they occur.
+
+
+        Each event is delivered as an SSE message in the format `data: <JSON>\n\n`. A heartbeat ping is sent every 15 seconds to keep the connection alive. Clients should reconnect automatically on disconnect.
+
+
+        All events share a common envelope structure with `id` (unique event ID), `ts` (ISO 8601 timestamp), `type` (event type discriminator), and `payload` (type-specific data). See the `EngineEvent` schema for all possible event types.'
+      tags:
+      - Replica
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the replica
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: SSE event stream opened successfully. Each line is a JSON-encoded `EngineEvent`.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/EngineEvent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/workspaces/{workspaceId}/chats:
+    get:
+      operationId: listWorkspaceChats
+      summary: List Workspace Chats
+      description: Lists active, sleeping, and pending chats. Chats created while the workspace is preparing remain visible while startup completes.
+      tags:
+      - Replica
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Workspace chats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceChatListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createWorkspaceChat
+      summary: Create Workspace Chat
+      description: Creates a chat immediately. For preparing or sleeping workspaces, the chat stays visible and is created in the engine after startup completes. Archived and error workspaces return 409.
+      tags:
+      - Replica
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChatRequest'
+      responses:
+        '201':
+          description: Chat accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateWorkspaceChatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/chats/{chatId}/messages:
+    post:
+      operationId: sendWorkspaceChatMessage
+      summary: Send Workspace Chat Message
+      description: Accepts a message immediately. Messages sent while a workspace is preparing or sleeping are queued server-side and delivered in order after startup completes. Archived and error workspaces return 409.
+      tags:
+      - Replica
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: chatId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendWorkspaceChatMessageRequest'
+      responses:
+        '200':
+          description: Message accepted by an active workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendWorkspaceChatMessageResponse'
+        '202':
+          description: Message queued while the workspace starts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendWorkspaceChatMessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/messages/deferred:
+    post:
+      operationId: sendDeferredWorkspaceMessage
+      summary: Send Deferred Workspace Message
+      description: Creates or selects a chat, queues a message, and wakes a preparing or sleeping workspace. The queued message remains available while startup completes. Archived and error workspaces return 409.
+      tags:
+      - Replica
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendDeferredWorkspaceMessageRequest'
+      responses:
+        '202':
+          description: Message queued and workspace waking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendDeferredWorkspaceMessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/archive:
+    post:
+      operationId: archiveWorkspace
+      summary: Archive Workspace
+      description: Archives a workspace in the authenticated organization. Archived workspaces stay paused and can be woken later.
+      tags:
+      - Replica
+      parameters:
+      - name: workspaceId
+        in: path
+        description: Workspace UUID.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Workspace archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveWorkspaceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/sleep:
+    post:
+      operationId: sleepWorkspace
+      summary: Sleep Workspace
+      description: Forces an active workspace in the authenticated organization to sleep, stopping compute charges. Slept workspaces can be woken later. A no-op for already-sleeping or archived workspaces; returns 409 for preparing or error workspaces.
+      tags:
+      - Replica
+      parameters:
+      - name: workspaceId
+        in: path
+        description: Workspace UUID.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Workspace slept
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SleepWorkspaceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    HooksResponse:
+      type: object
+      description: Hook execution logs for a replica
+      properties:
+        warm_hooks:
+          type: object
+          properties:
+            logs:
+              type: array
+              items:
+                $ref: '#/components/schemas/WarmHookLogEntry'
+          required:
+          - logs
+        start_hooks:
+          type: object
+          properties:
+            logs:
+              type: array
+              items:
+                $ref: '#/components/schemas/StartHookLogEntry'
+          required:
+          - logs
+      required:
+      - warm_hooks
+      - start_hooks
+    CanvasItemKind:
+      type: string
+      enum:
+      - markdown
+      - html
+      - image
+      - video
+      - audio
+      - other
+      description: The kind of Canvas item, inferred from its file extension.
+    ClaudeAgentEvent:
+      type: object
+      description: A streaming event from the Claude Code agent. The `type` field is prefixed with `claude-` followed by the SDK message type.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        type:
+          type: string
+          enum:
+          - claude-assistant
+          - claude-user
+          - claude-result
+          - claude-system
+          description: Claude event type. `claude-assistant` contains model output (text, thinking, tool use). `claude-user` contains tool results. `claude-result` signals turn completion or errors. `claude-system` contains system-level messages.
+        payload:
+          $ref: '#/components/schemas/ClaudeEventPayload'
+      required:
+      - timestamp
+      - type
+      - payload
+    EngineChatSummary:
+      type: object
+      description: Summary of a chat session as reported by the engine
+      properties:
+        id:
+          type: string
+          description: Unique chat session ID
+        provider:
+          type: string
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          description: Coding agent provider
+        title:
+          type: string
+          description: Chat title
+        createdAt:
+          type: string
+          format: date-time
+          description: When the chat was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the chat was last updated
+        processing:
+          type: boolean
+          description: Whether the chat is currently doing work — either processing a foreground message or running background/spawned-agent tasks
+        awaitingInput:
+          type: boolean
+          description: The agent has issued an interactive tool call (e.g. ExitPlanMode, AskUserQuestion) and is paused until the user resolves it. `processing` stays true while this is true.
+        parentChatId:
+          type:
+          - string
+          - 'null'
+          description: ID of the parent chat, if this is a sub-chat
+        lastMessageText:
+          type:
+          - string
+          - 'null'
+          description: Preview of the most recent input message sent to this chat.
+      required:
+      - id
+      - provider
+      - title
+      - createdAt
+      - updatedAt
+      - processing
+      - parentChatId
+    WorkspaceConfig:
+      type: object
+      description: Workspace behavior configuration. Missing capabilities and preferences default to disabled.
+      properties:
+        capabilities:
+          type: object
+          description: Actions this workspace is allowed to perform. Automations snapshot this config onto each workspace they create; API-created replicas can set it at creation time.
+          properties:
+            pr_followups:
+              type: boolean
+              description: Whether matching pull requests can receive Replicas follow-up actions. Defaults to true for workspaces created from the dashboard, Slack, Linear, GitHub, or the API, and to false for workspaces created from an automation. When enabled, later CI and review-comment replies can route back to this workspace.
+          additionalProperties: true
+        preferences:
+          type: object
+          description: Workspace behavior preferences that do not grant new action permissions.
+          properties:
+            keep_open_on_pr_merge:
+              type: boolean
+              description: Whether the workspace should remain open after its last tracked PR is merged. Defaults to false.
+              default: false
+            keep_open_on_pr_close:
+              type: boolean
+              description: Whether the workspace should remain open after its last tracked PR is closed without merging. Defaults to false.
+              default: false
+          additionalProperties: true
+        provisioning_error:
+          type: object
+          description: Setup/provisioning or wake/resume failure captured when the workspace remains queryable in `error` status. Some wake/resume failures can be retried; the `error` status can also represent an unrecoverable sandbox failure.
+          properties:
+            message:
+              type: string
+              description: Underlying setup failure message, such as repository clone/auth errors.
+          additionalProperties: true
+      additionalProperties: true
+    EngineRepoDiff:
+      type: object
+      description: Git diff statistics for a repository
+      properties:
+        added:
+          type: integer
+          description: Number of lines added
+        removed:
+          type: integer
+          description: Number of lines removed
+        fullDiff:
+          type: string
+          description: Full diff content
+      required:
+      - added
+      - removed
+    QueuedMessageInfo:
+      type: object
+      description: A message waiting in a chat queue.
+      properties:
+        id:
+          type: string
+          description: Unique queued message ID.
+        message:
+          type: string
+          description: Queued message text.
+        queuedAt:
+          type: string
+          format: date-time
+          description: When the message was queued.
+        senderUserId:
+          type: string
+          description: Identifier of the user who queued the message.
+        senderEmail:
+          type: string
+          description: Email of the user who queued the message.
+        senderDisplayName:
+          type: string
+          description: Display name of the user who queued the message.
+      required:
+      - id
+      - message
+      - queuedAt
+    CanvasListResponse:
+      type: object
+      description: List of items the agent has dropped into the Canvas.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CanvasItem'
+      required:
+      - items
+    ImageContent:
+      type: object
+      description: An image attachment for messages
+      properties:
+        type:
+          type: string
+          const: image
+          description: Content type, always 'image'
+        source:
+          type: object
+          description: Image source data
+          oneOf:
+          - type: object
+            properties:
+              type:
+                type: string
+                const: base64
+              media_type:
+                type: string
+                enum:
+                - image/png
+                - image/jpeg
+                - image/gif
+                - image/webp
+                description: MIME type of the image
+              data:
+                type: string
+                description: Base64-encoded image data
+            required:
+            - type
+            - media_type
+            - data
+          - type: object
+            properties:
+              type:
+                type: string
+                const: url
+              url:
+                type: string
+                format: uri
+                description: URL to the image
+            required:
+            - type
+            - url
+      required:
+      - type
+      - source
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    CodexAgentEvent:
+      type: object
+      description: A streaming event from the Codex CLI agent. Uses either `event_msg` for high-level messages or `response_item` for structured response items.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        type:
+          type: string
+          enum:
+          - event_msg
+          - response_item
+          description: '`event_msg` carries high-level messages (user input, reasoning). `response_item` carries structured responses (assistant messages, function calls, tool calls).'
+        payload:
+          $ref: '#/components/schemas/CodexEventPayload'
+      required:
+      - timestamp
+      - type
+      - payload
+    CreateReplicaRequest:
+      type: object
+      description: Request body for creating a new replica
+      properties:
+        name:
+          type: string
+          description: Human-readable name for the replica. Must not contain whitespace.
+          pattern: ^\S+$
+        message:
+          type: string
+          description: Initial message to send to the coding agent
+        environment_id:
+          type: string
+          format: uuid
+          description: ID of the environment to use. The server derives the repository or repository set from the environment binding. Required unless `repository_set_id` or `repository_ids` is provided for backwards compatibility.
+        repository_set_id:
+          type: string
+          format: uuid
+          deprecated: true
+          description: 'Deprecated. Use `environment_id` instead. Provided for backwards compatibility: the server resolves the first environment bound to this repository set.'
+        repository_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          deprecated: true
+          description: 'Deprecated. Use `environment_id` instead. Provided for backwards compatibility: the server resolves the first environment bound to one of the given repositories.'
+        coding_agent:
+          type: string
+          description: Coding agent to use
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          default: claude
+        model:
+          type: string
+          description: Model to use for the coding agent. Pi and Opencode accept z-ai/glm-5.2, minimax/minimax-m3, xiaomi/mimo-v2.5-pro, and moonshotai/kimi-k2.6 through OpenRouter.
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageContent'
+          description: Images to attach to the initial message
+        lifecycle_policy:
+          type: string
+          description: Lifecycle policy for the replica
+          enum:
+          - default
+          - archive_when_done
+          - sleep_when_done
+          - delete_after_inactivity
+        config:
+          $ref: '#/components/schemas/WorkspaceConfig'
+        plan_mode:
+          type: boolean
+          description: Whether to run the initial message in plan mode. Leading `/plan` in the message is also detected and stripped.
+        goal_mode:
+          type: boolean
+          description: Whether to set the initial message as the active Codex goal. Leading `/goal` in the message is also detected and stripped.
+        fast_mode:
+          type: boolean
+          description: Whether to run the initial message in fast mode. Leading `/fast` in the message is also detected and stripped.
+        thinking_level:
+          type: string
+          description: 'Thinking/reasoning level. Controls how much effort the agent puts into reasoning. `ultra` is Codex-only; `ultracode` is Claude Code-only. Falls back to provider default when omitted (Claude default: high, Codex default: medium, Cursor default: medium, Opencode default: medium, Pi default: model default).'
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - ultra
+          - ultracode
+        webhook_url:
+          description: 'Callback target for `replica.ready`, `replica.turn_completed`, `replica.deleted`, and `replica.error` events. `replica.deleted` fires only on explicit deletion; closing a linked PR or issue now archives the workspace silently, so automated cleanup no longer emits it. `replica.error` is emitted when the workspace enters `error` state and remains queryable; the payload includes the failure message. Some wake/resume errors can be retried with the wake endpoint. Pass a bare URL string or `{ url, secret }`; with a secret the platform sets `X-Replicas-Signature: sha256=<hex HMAC>` on every delivery.'
+          oneOf:
+          - type: string
+            format: uri
+          - $ref: '#/components/schemas/ReplicaWebhookConfig'
+        size:
+          type: string
+          description: Compute size for this replica. `small` (2 vCPU, 8 GB memory, 20 GB disk) bills at $0.008/min; `large` (4 vCPU, 16 GB memory, 32 GB disk) bills at $0.016/min. Defaults to `small` when omitted.
+          enum:
+          - small
+          - large
+      required:
+      - name
+      - message
+    OpencodeAgentEvent:
+      type: object
+      description: A streaming event from the Opencode agent. Opencode events are normalized with an `opencode-` prefixed type and an open provider payload.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        type:
+          type: string
+          pattern: ^opencode-
+          description: Opencode event type. Common values include `opencode-message.updated`, `opencode-session.idle`, `opencode-error`, and `opencode-part-*` events.
+        payload:
+          type: object
+          description: Opencode event payload. Shape depends on the parent event `type`; Opencode payload sub-shapes are not yet formally specified.
+          additionalProperties: true
+      required:
+      - timestamp
+      - type
+      - payload
+    ClaudeMessage:
+      type: object
+      description: A Claude SDK message containing an array of content blocks.
+      properties:
+        content:
+          type: array
+          description: Ordered list of content blocks produced or consumed by the model.
+          items:
+            $ref: '#/components/schemas/ClaudeContentBlock'
+    ListReplicasResponse:
+      type: object
+      properties:
+        replicas:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReplicaListItem'
+          description: Array of replicas
+        total:
+          type: integer
+          description: Total number of replicas matching the filters
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Number of items per page
+        total_pages:
+          type: integer
+          description: Total number of pages
+      required:
+      - replicas
+      - total
+      - page
+      - limit
+      - total_pages
+    ReplicaListItem:
+      type: object
+      description: A replica item in list responses
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the replica
+        name:
+          type: string
+          description: Human-readable name for the replica. Must not contain whitespace.
+          pattern: ^\S+$
+        status:
+          type: string
+          description: Current status of the replica
+          enum:
+          - active
+          - sleeping
+          - archived
+          - preparing
+          - error
+        source:
+          type: string
+          description: How the replica was created
+          enum:
+          - api
+          - dashboard
+          - slack
+          - linear
+          - github
+          - gitlab
+          - automation
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the replica was created
+        last_activity_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Timestamp of the last activity on the replica
+        repositories:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepositoryReference'
+          description: Repositories associated with the replica
+        pull_requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/PullRequest'
+          description: Associated pull requests
+      required:
+      - id
+      - name
+      - status
+      - source
+      - created_at
+      - last_activity_at
+      - repositories
+      - pull_requests
+    CursorAgentEvent:
+      type: object
+      description: A streaming event from the Cursor agent. Cursor events are normalized with a `cursor-` prefixed type and a provider payload.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        type:
+          type: string
+          enum:
+          - cursor-assistant
+          - cursor-thinking
+          - cursor-tool_call
+          - cursor-task
+          - cursor-status
+          - cursor-error
+          description: Cursor event type. `cursor-assistant` contains model output, `cursor-thinking` contains reasoning text, `cursor-tool_call` contains tool progress/results, `cursor-task` contains task updates, `cursor-status` contains run status, and `cursor-error` contains failure details.
+        payload:
+          type: object
+          description: Cursor event payload. Shape depends on the parent event `type`; Cursor payload sub-shapes are not yet formally specified.
+          additionalProperties: true
+      required:
+      - timestamp
+      - type
+      - payload
+    CodexEventPayload:
+      description: Payload of a Codex CLI agent event. Shape depends on the parent event `type`.
+      oneOf:
+      - $ref: '#/components/schemas/CodexEventMsgPayload'
+      - $ref: '#/components/schemas/CodexResponseItemPayload'
+      discriminator:
+        propertyName: type
+        mapping:
+          user_message: '#/components/schemas/CodexEventMsgPayload'
+          agent_reasoning: '#/components/schemas/CodexEventMsgPayload'
+          message: '#/components/schemas/CodexResponseItemPayload'
+          function_call: '#/components/schemas/CodexResponseItemPayload'
+          function_call_output: '#/components/schemas/CodexResponseItemPayload'
+          custom_tool_call: '#/components/schemas/CodexResponseItemPayload'
+          custom_tool_call_output: '#/components/schemas/CodexResponseItemPayload'
+    ClaudeEventPayload:
+      type: object
+      description: Payload of a Claude Code agent event, wrapping the Claude SDK message.
+      properties:
+        type:
+          type: string
+          description: Original SDK message type (e.g. `assistant`, `user`, `result`)
+        subtype:
+          type: string
+          description: Present on `claude-result` events; `success` indicates a clean turn completion. Any other value (e.g. `error`) signals a failed turn even when `is_error` is false.
+        parent_tool_use_id:
+          type:
+          - string
+          - 'null'
+          description: If this message is the result of a sub-agent tool call, the parent tool_use ID
+        message:
+          $ref: '#/components/schemas/ClaudeMessage'
+        is_error:
+          type: boolean
+          description: Present on `claude-result` events; true if the turn ended with an error
+        errors:
+          type: array
+          items:
+            type: string
+          description: Array of error messages, present on `claude-result` events when `is_error` is true
+      additionalProperties: true
+    EngineEvent:
+      type: object
+      description: A real-time event from the replica engine. All events share a common envelope with `id`, `ts`, `type`, and `payload` fields. The `type` field discriminates between event variants.
+      oneOf:
+      - title: engine.ready
+        type: object
+        description: Engine initialization complete.
+        properties:
+          id:
+            type: string
+            description: Unique event ID
+          ts:
+            type: string
+            format: date-time
+            description: ISO 8601 timestamp
+          type:
+            type: string
+            const: engine.ready
+          payload:
+            type: object
+            properties:
+              version:
+                type: string
+                description: Engine protocol version
+                example: v1
+            required:
+            - version
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: engine.status.changed
+        type: object
+        description: Engine status snapshot changed (uptime, active sessions, chat counts, etc.).
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: engine.status.changed
+          payload:
+            type: object
+            properties:
+              status:
+                $ref: '#/components/schemas/EngineStatusSnapshot'
+            required:
+            - status
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: repo.discovered
+        type: object
+        description: New repositories discovered in the workspace.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: repo.discovered
+          payload:
+            type: object
+            properties:
+              repos:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EngineRepoState'
+            required:
+            - repos
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: repo.status.changed
+        type: object
+        description: Repository status changed (branch, diff, PR URL, start hooks status).
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: repo.status.changed
+          payload:
+            type: object
+            properties:
+              repos:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EngineRepoState'
+            required:
+            - repos
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.created
+        type: object
+        description: A new chat session was created.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.created
+          payload:
+            type: object
+            properties:
+              chat:
+                $ref: '#/components/schemas/EngineChatSummary'
+              clientRequestId:
+                type: string
+                description: Echo of the `clientRequestId` from the create request, if one was provided
+            required:
+            - chat
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.updated
+        type: object
+        description: A chat session was updated (e.g. title or processing state changed).
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.updated
+          payload:
+            type: object
+            properties:
+              chat:
+                $ref: '#/components/schemas/EngineChatSummary'
+            required:
+            - chat
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.deleted
+        type: object
+        description: A chat session was deleted.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.deleted
+          payload:
+            type: object
+            properties:
+              chatId:
+                type: string
+                description: ID of the deleted chat
+            required:
+            - chatId
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.turn.accepted
+        type: object
+        description: A message was accepted and queued for processing.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.turn.accepted
+          payload:
+            type: object
+            properties:
+              chatId:
+                type: string
+                description: Chat session ID
+              messageId:
+                type: string
+                description: Unique message ID
+              queued:
+                type: boolean
+                description: Whether the message was queued (true) or processing immediately (false)
+              position:
+                type: integer
+                description: Position in the queue (0 if processing immediately)
+            required:
+            - chatId
+            - messageId
+            - queued
+            - position
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.turn.started
+        type: object
+        description: The coding agent started processing a message.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.turn.started
+          payload:
+            type: object
+            properties:
+              chatId:
+                type: string
+                description: Chat session ID
+              messageId:
+                type: string
+                description: Message being processed
+            required:
+            - chatId
+            - messageId
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.turn.delta
+        type: object
+        description: A streaming delta from the coding agent (tool calls, text output, etc.).
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.turn.delta
+          payload:
+            type: object
+            properties:
+              chatId:
+                type: string
+                description: Chat session ID
+              event:
+                $ref: '#/components/schemas/AgentEvent'
+            required:
+            - chatId
+            - event
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.turn.completed
+        type: object
+        description: The coding agent finished processing a message.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.turn.completed
+          payload:
+            type: object
+            properties:
+              chatId:
+                type: string
+                description: Chat session ID
+              isComplete:
+                type: boolean
+                description: Whether the turn completed fully (false if interrupted or errored)
+            required:
+            - chatId
+            - isComplete
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: chat.interrupted
+        type: object
+        description: A chat turn was interrupted.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: chat.interrupted
+          payload:
+            type: object
+            properties:
+              chatId:
+                type: string
+                description: Chat session ID
+              interrupted:
+                type: boolean
+                description: Whether the interruption was successful
+              queue:
+                type: array
+                items:
+                  type: string
+                description: Remaining message IDs in the queue
+            required:
+            - chatId
+            - interrupted
+            - queue
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: hooks.started
+        type: object
+        description: Hooks started executing.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: hooks.started
+          payload:
+            type: object
+            properties:
+              running:
+                type: boolean
+                description: Whether hooks are currently running
+              completed:
+                type: boolean
+                description: Whether hooks have completed
+            required:
+            - running
+            - completed
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: hooks.progress
+        type: object
+        description: Hooks execution progress update.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: hooks.progress
+          payload:
+            type: object
+            properties:
+              running:
+                type: boolean
+              completed:
+                type: boolean
+            required:
+            - running
+            - completed
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: hooks.completed
+        type: object
+        description: Hooks completed successfully.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: hooks.completed
+          payload:
+            type: object
+            properties:
+              running:
+                type: boolean
+              completed:
+                type: boolean
+            required:
+            - running
+            - completed
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: hooks.failed
+        type: object
+        description: Hooks execution failed.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: hooks.failed
+          payload:
+            type: object
+            properties:
+              running:
+                type: boolean
+              completed:
+                type: boolean
+            required:
+            - running
+            - completed
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: hooks.status
+        type: object
+        description: Current hooks status snapshot.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: hooks.status
+          payload:
+            type: object
+            properties:
+              running:
+                type: boolean
+              completed:
+                type: boolean
+            required:
+            - running
+            - completed
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: preview.changed
+        type: object
+        description: Available preview ports changed.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: preview.changed
+          payload:
+            type: object
+            properties:
+              previews:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnginePreviewPort'
+            required:
+            - previews
+        required:
+        - id
+        - ts
+        - type
+        - payload
+      - title: error
+        type: object
+        description: An error occurred in the event stream.
+        properties:
+          id:
+            type: string
+          ts:
+            type: string
+            format: date-time
+          type:
+            type: string
+            const: error
+          payload:
+            type: object
+            properties:
+              code:
+                type: string
+                description: Machine-readable error code
+              message:
+                type: string
+                description: Human-readable error message
+              details:
+                type: string
+                description: Additional error details
+            required:
+            - code
+            - message
+        required:
+        - id
+        - ts
+        - type
+        - payload
+    PullRequest:
+      type: object
+      description: A pull request associated with a replica
+      properties:
+        repository:
+          type: string
+          description: Repository name
+        number:
+          type: integer
+          description: Pull request number
+        url:
+          type: string
+          format: uri
+          description: URL to the pull request
+      required:
+      - repository
+      - number
+      - url
+    RepositoryReference:
+      type: object
+      description: A repository reference in replica list items
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Repository ID
+        name:
+          type: string
+          description: Repository name
+        url:
+          type: string
+          format: uri
+          description: Repository URL
+      required:
+      - id
+      - name
+      - url
+    SleepWorkspaceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the sleep request was accepted
+      required:
+      - success
+    WorkspaceChatListResponse:
+      type: object
+      properties:
+        chats:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceChat'
+        deletedChats:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceChat'
+      required:
+      - chats
+    CreateChatRequest:
+      type: object
+      description: Request body for creating a new chat
+      properties:
+        provider:
+          type: string
+          description: Coding agent provider for this chat
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+        id:
+          type: string
+          format: uuid
+          description: Optional client-generated chat ID.
+        createdAt:
+          type: string
+          format: date-time
+          description: Optional client-generated creation time.
+        title:
+          type: string
+          description: Title for the chat
+        parentChatId:
+          type: string
+          format: uuid
+          description: Optional parent chat ID.
+        clientRequestId:
+          type: string
+          description: Opaque client-chosen id echoed back in the `chat.created` event, so clients doing optimistic UI can recognize their own create
+      required:
+      - provider
+    CreateReplicaResponse:
+      type: object
+      properties:
+        replica:
+          $ref: '#/components/schemas/ReplicaListItem'
+      required:
+      - replica
+    ChatMessageSender:
+      type: object
+      description: Records who sent a user message in a chat. Server-recorded from the authenticated user at send time.
+      properties:
+        senderUserId:
+          type: string
+          description: Identifier of the user who sent the message.
+        senderEmail:
+          type: string
+          description: Email of the user who sent the message.
+        recordedAt:
+          type: string
+          format: date-time
+          description: When the sender was recorded by the engine.
+      required:
+      - senderUserId
+      - senderEmail
+      - recordedAt
+    GitDiff:
+      type: object
+      description: Git diff statistics
+      properties:
+        added:
+          type: integer
+          description: Number of lines added
+        removed:
+          type: integer
+          description: Number of lines removed
+        full_diff:
+          type: string
+          description: Full diff content
+      required:
+      - added
+      - removed
+      - full_diff
+    CodexResponseItemPayload:
+      type: object
+      description: Payload for `response_item` events — structured items from the Codex response stream.
+      oneOf:
+      - type: object
+        title: AssistantMessage
+        description: A text message from the Codex agent.
+        properties:
+          type:
+            type: string
+            const: message
+          role:
+            type: string
+            const: assistant
+          content:
+            type: array
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  const: output_text
+                text:
+                  type: string
+                  description: The text content
+              required:
+              - type
+              - text
+        required:
+        - type
+        - role
+        - content
+      - type: object
+        title: FunctionCall
+        description: A function call by the Codex agent (shell commands, plan updates).
+        properties:
+          type:
+            type: string
+            const: function_call
+          call_id:
+            type: string
+            description: Unique ID for this call, referenced by the corresponding `function_call_output`
+          name:
+            type: string
+            enum:
+            - shell
+            - shell_command
+            - exec_command
+            - update_plan
+            description: Function name
+          arguments:
+            type: string
+            description: 'JSON-encoded arguments (e.g. `{"command": "ls -la"}` for shell commands, `{"plan": [...]}` for plan updates)'
+        required:
+        - type
+        - call_id
+        - name
+        - arguments
+      - type: object
+        title: FunctionCallOutput
+        description: Output from a previously invoked function call.
+        properties:
+          type:
+            type: string
+            const: function_call_output
+          call_id:
+            type: string
+            description: ID of the function_call this output corresponds to
+          output:
+            type: string
+            description: Raw output string. For shell commands this may include exit codes and stdout/stderr.
+        required:
+        - type
+        - call_id
+        - output
+      - type: object
+        title: CustomToolCall
+        description: A custom tool invocation (e.g. `apply_patch` for file edits).
+        properties:
+          type:
+            type: string
+            const: custom_tool_call
+          call_id:
+            type: string
+            description: Unique ID for this call
+          name:
+            type: string
+            description: Tool name (e.g. `apply_patch`)
+          input:
+            type: string
+            description: Tool input (e.g. patch content for `apply_patch`)
+          status:
+            type: string
+            enum:
+            - in_progress
+            - completed
+            - failed
+            description: Current execution status
+        required:
+        - type
+        - call_id
+        - name
+        - input
+      - type: object
+        title: CustomToolCallOutput
+        description: Output from a custom tool call.
+        properties:
+          type:
+            type: string
+            const: custom_tool_call_output
+          call_id:
+            type: string
+            description: ID of the custom_tool_call this output corresponds to
+          output:
+            type: string
+            description: JSON-encoded output with optional `metadata.exit_code`
+        required:
+        - type
+        - call_id
+        - output
+      discriminator:
+        propertyName: type
+    RepositoryStatus:
+      type: object
+      description: Status of a repository within a replica
+      properties:
+        repository:
+          type: string
+          description: Repository name
+        branch:
+          type: string
+          description: Current git branch
+        default_branch:
+          type: string
+          description: Default branch of the repository
+        pr_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: All pull request URLs the workspace has opened in this repository.
+        start_hooks_completed:
+          type: boolean
+          description: Whether start hooks have finished executing
+        git_diff:
+          oneOf:
+          - $ref: '#/components/schemas/GitDiff'
+          - type: 'null'
+          description: Git diff statistics, if available
+      required:
+      - repository
+      - branch
+      - default_branch
+      - pr_urls
+      - start_hooks_completed
+      - git_diff
+    SendReplicaMessageResponse:
+      type: object
+      description: Response after sending a message to a replica
+      properties:
+        status:
+          type: string
+          description: Status of the message delivery
+          enum:
+          - sent
+          - queued
+          - waking
+        message_id:
+          type:
+          - string
+          - 'null'
+          description: Unique identifier for the sent message
+        position:
+          type:
+          - integer
+          - 'null'
+          description: Queue position if status is 'queued'
+        chat_id:
+          type:
+          - string
+          - 'null'
+          description: ID of the chat the message was sent to
+      required:
+      - status
+      - message_id
+      - position
+      - chat_id
+    CanvasContentResponse:
+      type: object
+      description: 'A single Canvas item''s content. Text kinds populate `content`; binary kinds populate `base64`. Items over the 5 MB per-file cap return `tooLarge: true` with neither payload populated.'
+      properties:
+        filename:
+          type: string
+        kind:
+          $ref: '#/components/schemas/CanvasItemKind'
+        sizeBytes:
+          type: integer
+        mimeType:
+          type: string
+          description: MIME type to render the content with (e.g. `text/markdown; charset=utf-8`, `image/png`).
+        content:
+          type: string
+          description: UTF-8 text for `markdown` / `html` kinds.
+        base64:
+          type: string
+          description: Base64 payload for `image` / `video` / `audio` / `other` kinds.
+        tooLarge:
+          type: boolean
+          description: Present and `true` when the file exceeded the engine's per-file size cap.
+      required:
+      - filename
+      - kind
+      - sizeBytes
+      - mimeType
+    GetReplicaResponse:
+      type: object
+      properties:
+        replica:
+          $ref: '#/components/schemas/ReplicaDetails'
+      required:
+      - replica
+    SendReplicaMessageRequest:
+      type: object
+      description: Request body for sending a message to a replica
+      properties:
+        message:
+          type: string
+          description: Message to send to the coding agent
+        coding_agent:
+          type: string
+          description: Coding agent to use
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+        chat_id:
+          type: string
+          description: Target a specific chat session
+        model:
+          type: string
+          description: Model to use for this message. Pi and Opencode accept z-ai/glm-5.2, minimax/minimax-m3, xiaomi/mimo-v2.5-pro, and moonshotai/kimi-k2.6 through OpenRouter.
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageContent'
+          description: Images to attach to the message
+        plan_mode:
+          type: boolean
+          description: Whether to run in plan mode. Leading `/plan` in the message is also detected and stripped.
+        goal_mode:
+          type: boolean
+          description: Whether to set the message as the active Codex goal. Leading `/goal` in the message is also detected and stripped.
+        fast_mode:
+          type: boolean
+          description: Whether to run in fast mode. Leading `/fast` in the message is also detected and stripped.
+        thinking_level:
+          type: string
+          description: 'Thinking/reasoning level. Controls how much effort the agent puts into reasoning. `ultra` is Codex-only; `ultracode` is Claude Code-only. Falls back to provider default when omitted (Claude default: high, Codex default: medium, Cursor default: medium, Opencode default: medium, Pi default: model default).'
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - ultra
+          - ultracode
+        senderUserId:
+          type: string
+          description: Identifier of the user sending this message. When the request is authenticated via dashboard auth, the server overrides this with the authenticated user's id so team workspaces can attribute messages to the actual sender.
+        senderEmail:
+          type: string
+          description: Email of the user sending this message. When the request is authenticated via dashboard auth, the server overrides this with the authenticated user's email.
+      required:
+      - message
+    SendDeferredWorkspaceMessageResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          const: waking
+        chatId:
+          type: string
+          format: uuid
+        messageId:
+          type: string
+      required:
+      - status
+      - chatId
+      - messageId
+    SendDeferredWorkspaceMessageRequest:
+      allOf:
+      - $ref: '#/components/schemas/SendWorkspaceChatMessageRequest'
+      - type: object
+        properties:
+          provider:
+            type: string
+            enum:
+            - claude
+            - codex
+            - cursor
+            - opencode
+            - pi
+          chatId:
+            type: string
+            format: uuid
+          generateName:
+            type: boolean
+        required:
+        - provider
+    ChatQueueResponse:
+      type: object
+      description: Queued messages for a chat.
+      properties:
+        chatId:
+          type: string
+          description: Chat session ID.
+        processing:
+          type: boolean
+          description: Whether the chat is currently doing work — either processing a foreground message or running background/spawned-agent tasks.
+        queue:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueuedMessageInfo'
+      required:
+      - chatId
+      - processing
+      - queue
+    WarmHookLogEntry:
+      type: object
+      description: 'A warm hook execution log entry. Note: fields use camelCase as they are passed through from the engine.'
+      properties:
+        hookType:
+          type: string
+          description: Type of hook
+          enum:
+          - global
+          - repository
+        hookName:
+          type: string
+          description: Name of the hook
+        hookScript:
+          type: string
+          description: Script that was executed
+        output:
+          type: string
+          description: Hook execution output. When `outputTruncated` is true, this is a preview of up to ~100,000 characters of the full stored log; the complete log can be retrieved via the dashboard full-log endpoint.
+        outputTruncated:
+          type: boolean
+          description: Whether `output` has been truncated to a preview.
+        outputTotalChars:
+          type: integer
+          description: Total character length of the full stored log (regardless of whether `output` is truncated).
+        exitCode:
+          type: integer
+          description: Exit code of the hook
+        timedOut:
+          type: boolean
+          description: Whether the hook timed out
+        executedAt:
+          type: string
+          format: date-time
+          description: When the hook was executed
+      required:
+      - hookType
+      - hookName
+      - hookScript
+      - output
+      - outputTruncated
+      - outputTotalChars
+      - exitCode
+      - timedOut
+      - executedAt
+    SendWorkspaceChatMessageResponse:
+      type: object
+      properties:
+        messageId:
+          type: string
+        queued:
+          type: boolean
+        position:
+          type: integer
+      required:
+      - messageId
+      - queued
+      - position
+    ReplicaWebhookConfig:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: HTTPS endpoint the platform POSTs JSON events to.
+        secret:
+          type: string
+          description: Optional shared secret used to compute the `X-Replicas-Signature` header (`sha256=` HMAC of the raw JSON body).
+      required:
+      - url
+    ReplicaDetails:
+      type: object
+      description: Detailed replica information including engine status and environment
+      allOf:
+      - $ref: '#/components/schemas/ReplicaListItem'
+      - type: object
+        properties:
+          coding_agent:
+            type:
+            - string
+            - 'null'
+            description: Currently active coding agent
+            enum:
+            - claude
+            - codex
+            - cursor
+            - opencode
+            - pi
+            - null
+          repository_statuses:
+            type: array
+            items:
+              $ref: '#/components/schemas/RepositoryStatus'
+            description: Status of each repository in the replica
+          waking:
+            type:
+            - boolean
+            - 'null'
+            description: Whether the workspace was just woken from a sleeping or archived state. Retry in 30-90 seconds for full details.
+          chats:
+            type: array
+            items:
+              $ref: '#/components/schemas/ReplicaChat'
+            description: Chat sessions in this replica
+          environment:
+            oneOf:
+            - $ref: '#/components/schemas/ReplicaEnvironment'
+            - type: 'null'
+            description: Environment configuration. Only included when requested via include=environment.
+    EnginePreviewPort:
+      type: object
+      description: A preview port forwarded from the replica
+      properties:
+        port:
+          type: integer
+          description: Local port number
+        publicUrl:
+          type: string
+          format: uri
+          description: Public URL for the preview
+        createdAt:
+          type: string
+          format: date-time
+          description: When the preview was created
+      required:
+      - port
+      - publicUrl
+      - createdAt
+    ReadReplicaHistoryResponse:
+      type: object
+      description: Response containing paginated conversation history
+      properties:
+        thread_id:
+          type:
+          - string
+          - 'null'
+          description: Thread/session ID
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryEvent'
+          description: History events (paginated from the end)
+        total:
+          type: integer
+          description: Total number of events
+        has_more:
+          type: boolean
+          description: Whether there are more events available
+        coding_agent:
+          type:
+          - string
+          - 'null'
+          description: Currently active coding agent
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          - null
+        waking:
+          type:
+          - boolean
+          - 'null'
+          description: Whether the workspace was just woken from a sleeping or archived state. Retry in 30-90 seconds.
+        codexAspTranscript:
+          type:
+          - object
+          - 'null'
+          description: Native Codex ASP transcript when available
+        senders:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessageSender'
+          description: Sender attribution records for user messages in this chat. In team workspaces, each sendMessage call records the authenticated user; clients can use this to label messages with the actual sender's name instead of "You".
+      required:
+      - thread_id
+      - events
+      - total
+      - has_more
+    EngineRepoState:
+      type: object
+      description: State of a repository within the engine
+      properties:
+        name:
+          type: string
+          description: Repository name
+        path:
+          type: string
+          description: Filesystem path to the repository
+        defaultBranch:
+          type: string
+          description: Default branch name (e.g. main)
+        currentBranch:
+          type: string
+          description: Currently checked-out branch
+        prUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: All pull request URLs the workspace has opened in this repository. A single workspace may have multiple PRs in the same repo (e.g. after switching branches or opening follow-up PRs), so this is an array. Empty when no PRs have been observed.
+        gitDiff:
+          oneOf:
+          - $ref: '#/components/schemas/EngineRepoDiff'
+          - type: 'null'
+          description: Git diff statistics, if available
+        startHooksCompleted:
+          type: boolean
+          description: Whether start hooks have finished executing
+        provider:
+          type: string
+          enum:
+          - github
+          - gitlab
+          description: Code host for the repository's origin remote, when resolvable
+      required:
+      - name
+      - path
+      - defaultBranch
+      - currentBranch
+      - prUrls
+      - gitDiff
+      - startHooksCompleted
+    SendWorkspaceChatMessageRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        messageId:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        model:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageContent'
+        planMode:
+          type: boolean
+        goalMode:
+          type: boolean
+        fastMode:
+          type: boolean
+        thinkingLevel:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - ultra
+          - ultracode
+      required:
+      - message
+    CanvasItem:
+      type: object
+      description: An entry returned by `listReplicaCanvasItems`.
+      properties:
+        filename:
+          type: string
+          description: The basename of the file inside the Canvas directory.
+        kind:
+          $ref: '#/components/schemas/CanvasItemKind'
+        sizeBytes:
+          type: integer
+          description: File size in bytes, measured at list time.
+      required:
+      - filename
+      - kind
+      - sizeBytes
+    StartHookLogEntry:
+      type: object
+      description: 'A start hook execution log entry. Note: fields use camelCase as they are passed through from the engine.'
+      properties:
+        hookType:
+          type: string
+          description: Type of start hook. `environment` is the workspace-level start hook configured on the environment; `repository` is a per-repo start hook from replicas.json/yaml.
+          enum:
+          - environment
+          - repository
+        hookName:
+          type: string
+          description: Identifier for the hook. For `repository` hooks this is the repository name; for the `environment` hook it is the literal string `environment`.
+        repoName:
+          type: string
+          description: 'Deprecated: use `hookName` instead. Equals `hookName` for repository hooks and the literal `environment` for the environment hook.'
+        hookCommands:
+          type: array
+          items:
+            type: string
+          description: Commands that were executed
+        output:
+          type: string
+          description: Hook execution output. When `outputTruncated` is true, this is a preview of up to ~100,000 characters of the full stored log; the complete log can be retrieved via the dashboard full-log endpoint.
+        outputTruncated:
+          type: boolean
+          description: Whether `output` has been truncated to a preview.
+        outputTotalChars:
+          type: integer
+          description: Total character length of the full stored log (regardless of whether `output` is truncated).
+        exitCode:
+          type: integer
+          description: Exit code of the hook
+        timedOut:
+          type: boolean
+          description: Whether the hook timed out
+        executedAt:
+          type: string
+          format: date-time
+          description: When the hook was executed
+      required:
+      - hookType
+      - hookName
+      - repoName
+      - hookCommands
+      - output
+      - outputTruncated
+      - outputTotalChars
+      - exitCode
+      - timedOut
+      - executedAt
+    WorkspaceChat:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        provider:
+          type: string
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        processing:
+          type: boolean
+        parentChatId:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        lastMessageText:
+          type:
+          - string
+          - 'null'
+      required:
+      - id
+      - provider
+      - title
+      - createdAt
+      - updatedAt
+      - processing
+      - parentChatId
+    SlashCommand:
+      type: object
+      description: A slash command available in a chat composer
+      properties:
+        command:
+          type: string
+          description: Slash command name, including the leading slash
+        description:
+          type: string
+          description: Short description of what the command does
+        argumentHint:
+          type: string
+          description: Optional argument hint for the command
+        providers:
+          type: array
+          description: Coding agent providers that support this command
+          items:
+            type: string
+            enum:
+            - claude
+            - codex
+            - cursor
+            - opencode
+            - pi
+      required:
+      - command
+      - description
+      - providers
+    ReplicaEnvironment:
+      type: object
+      description: Environment configuration and status for a replica
+      properties:
+        engine_version:
+          type: string
+          description: Version of the replica engine
+        files_uploaded:
+          type: array
+          items:
+            type: string
+          description: List of uploaded file names
+        env_vars_set:
+          type: array
+          items:
+            type: string
+          description: List of environment variable names that are set
+        skills_installed:
+          type: array
+          items:
+            type: string
+          description: List of installed skill names
+        integrations:
+          type: object
+          properties:
+            github:
+              type: boolean
+            gitlab:
+              type: boolean
+            linear:
+              type: boolean
+            slack:
+              type: boolean
+            google:
+              type: boolean
+          required:
+          - github
+          - gitlab
+          - linear
+          - slack
+          - google
+          description: Integration connection statuses
+        coding_agents:
+          type: object
+          properties:
+            claude:
+              type: object
+              properties:
+                available:
+                  type: boolean
+                auth_method:
+                  type: string
+              required:
+              - available
+              - auth_method
+            codex:
+              type: object
+              properties:
+                available:
+                  type: boolean
+                auth_method:
+                  type: string
+              required:
+              - available
+              - auth_method
+            opencode:
+              type: object
+              properties:
+                available:
+                  type: boolean
+                auth_method:
+                  type: string
+              required:
+              - available
+              - auth_method
+            pi:
+              type: object
+              properties:
+                available:
+                  type: boolean
+                auth_method:
+                  type: string
+              required:
+              - available
+              - auth_method
+            cursor:
+              type: object
+              properties:
+                available:
+                  type: boolean
+                auth_method:
+                  type: string
+              required:
+              - available
+              - auth_method
+          required:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          description: Available coding agents and their authentication methods
+        hooks:
+          type: object
+          properties:
+            global_warm_hook:
+              type: object
+              properties:
+                status:
+                  type: string
+                details:
+                  type:
+                  - string
+                  - 'null'
+              required:
+              - status
+              - details
+            repositories:
+              type: array
+              items:
+                type: object
+                properties:
+                  repository_name:
+                    type: string
+                  warm_hook:
+                    type: string
+                  start_hook:
+                    type: string
+                required:
+                - repository_name
+                - warm_hook
+                - start_hook
+          required:
+          - global_warm_hook
+          - repositories
+          description: Hook configuration and status
+        last_updated_at:
+          type: string
+          format: date-time
+          description: When the environment was last updated
+      required:
+      - engine_version
+      - files_uploaded
+      - env_vars_set
+      - skills_installed
+      - integrations
+      - coding_agents
+      - hooks
+      - last_updated_at
+    CreateWorkspaceChatResponse:
+      type: object
+      properties:
+        chat:
+          $ref: '#/components/schemas/WorkspaceChat'
+      required:
+      - chat
+    PiAgentEvent:
+      type: object
+      description: A streaming event from the Pi coding agent. Pi events expose session lifecycle, text and reasoning updates, tool execution, and errors.
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        type:
+          type: string
+          pattern: ^pi-
+          description: Pi event type. Common values include pi-message_update, pi-tool_execution_start, pi-tool_execution_update, pi-tool_execution_end, and pi-error.
+        payload:
+          type: object
+          description: Pi event payload. Shape depends on the parent event type.
+          additionalProperties: true
+      required:
+      - timestamp
+      - type
+      - payload
+    ReorderQueueRequest:
+      type: object
+      description: Request to move a queued message to a new position.
+      properties:
+        messageId:
+          type: string
+          description: Queued message ID.
+        position:
+          type: integer
+          description: Zero-based target position.
+      required:
+      - messageId
+      - position
+    CodexEventMsgPayload:
+      type: object
+      description: Payload for `event_msg` events — high-level user or reasoning messages.
+      properties:
+        type:
+          type: string
+          enum:
+          - user_message
+          - agent_reasoning
+          description: '`user_message` for user input, `agent_reasoning` for the agent''s chain-of-thought'
+        message:
+          type: string
+          description: User message text (present when type is `user_message`)
+        text:
+          type: string
+          description: Reasoning text (present when type is `agent_reasoning`)
+      required:
+      - type
+    EngineStatusSnapshot:
+      type: object
+      description: A snapshot of the engine's current status
+      properties:
+        uptimeSeconds:
+          type: number
+          description: Engine uptime in seconds
+        hasActiveSSHSessions:
+          type: boolean
+          description: Whether there are active SSH sessions
+        activeSseClients:
+          type: integer
+          description: Number of active SSE client connections
+        chatsTotal:
+          type: integer
+          description: Total number of chat sessions
+        chatsProcessing:
+          type: integer
+          description: Number of chats currently doing work, including those running background/spawned-agent tasks
+        reposTotal:
+          type: integer
+          description: Total number of repositories
+        hooksRunning:
+          type: boolean
+          description: Whether hooks are currently running
+        desktopReady:
+          type: boolean
+          description: Whether the sandbox's noVNC desktop port is accepting connections. The desktop stack boots after wake, so this can lag behind engine readiness. Absent on older engines that do not report it.
+      required:
+      - uptimeSeconds
+      - hasActiveSSHSessions
+      - activeSseClients
+      - chatsTotal
+      - chatsProcessing
+      - reposTotal
+      - hooksRunning
+    ClaudeContentBlock:
+      type: object
+      description: A single content block within a Claude message. Discriminated by `type`.
+      oneOf:
+      - type: object
+        title: TextBlock
+        description: A text response from the model.
+        properties:
+          type:
+            type: string
+            const: text
+          text:
+            type: string
+            description: The text content
+        required:
+        - type
+        - text
+      - type: object
+        title: ThinkingBlock
+        description: An extended-thinking block showing the model's reasoning.
+        properties:
+          type:
+            type: string
+            const: thinking
+          text:
+            type: string
+            description: The thinking/reasoning content
+        required:
+        - type
+        - text
+      - type: object
+        title: ToolUseBlock
+        description: A tool invocation by the model (e.g. Bash, Edit, Write, Grep, Glob, Read, WebSearch, TaskCreate, Skill).
+        properties:
+          type:
+            type: string
+            const: tool_use
+          id:
+            type: string
+            description: Unique ID for this tool use, referenced by subsequent tool_result blocks
+          name:
+            type: string
+            description: Tool name (e.g. `Bash`, `Edit`, `Write`, `Read`, `Grep`, `Glob`, `WebSearch`, `TaskCreate`, `Skill`)
+          input:
+            type: object
+            additionalProperties: true
+            description: Tool-specific input parameters
+        required:
+        - type
+        - id
+        - name
+        - input
+      - type: object
+        title: ToolResultBlock
+        description: The result of a tool invocation, sent back to the model in `claude-user` events.
+        properties:
+          type:
+            type: string
+            const: tool_result
+          tool_use_id:
+            type: string
+            description: ID of the tool_use block this result corresponds to
+          content:
+            description: Tool output — either a plain string or an array of text/image blocks.
+            oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - text
+                    - image
+                  text:
+                    type: string
+                  source:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      media_type:
+                        type: string
+                      data:
+                        type: string
+                        description: Base64-encoded image data
+          is_error:
+            type: boolean
+            description: Whether the tool execution resulted in an error
+        required:
+        - type
+        - tool_use_id
+      discriminator:
+        propertyName: type
+    ArchiveWorkspaceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the workspace was archived
+      required:
+      - success
+    HistoryEvent:
+      type: object
+      description: A conversation history event
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        type:
+          type: string
+          description: Type of event (e.g., 'claude-user', 'claude-assistant', 'codex-user', 'cursor-assistant')
+        payload:
+          $ref: '#/components/schemas/AgentEvent'
+          description: Event payload — see AgentEvent for the full discriminated schema
+      required:
+      - timestamp
+      - type
+      - payload
+    ReplicaChat:
+      type: object
+      description: A chat session within a replica
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the chat
+        provider:
+          type: string
+          description: Coding agent provider for this chat
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+        title:
+          type: string
+          description: Chat title
+        created_at:
+          type: string
+          format: date-time
+          description: When the chat was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the chat was last updated
+        processing:
+          type: boolean
+          description: Whether the chat is currently doing work — either processing a foreground message or running background/spawned-agent tasks
+      required:
+      - id
+      - provider
+      - title
+      - created_at
+      - updated_at
+      - processing
+    AgentEvent:
+      description: A raw event from the coding agent, streamed as part of `chat.turn.delta` events. The shape depends on the coding agent provider. Use the `type` field to discriminate between Claude, Codex, Cursor, Opencode, and Pi events.
+      oneOf:
+      - $ref: '#/components/schemas/ClaudeAgentEvent'
+      - $ref: '#/components/schemas/CodexAgentEvent'
+      - $ref: '#/components/schemas/CursorAgentEvent'
+      - $ref: '#/components/schemas/OpencodeAgentEvent'
+      - $ref: '#/components/schemas/PiAgentEvent'
+      discriminator:
+        propertyName: type
+        mapping:
+          claude-assistant: '#/components/schemas/ClaudeAgentEvent'
+          claude-user: '#/components/schemas/ClaudeAgentEvent'
+          claude-result: '#/components/schemas/ClaudeAgentEvent'
+          claude-system: '#/components/schemas/ClaudeAgentEvent'
+          event_msg: '#/components/schemas/CodexAgentEvent'
+          response_item: '#/components/schemas/CodexAgentEvent'
+          cursor-assistant: '#/components/schemas/CursorAgentEvent'
+          cursor-thinking: '#/components/schemas/CursorAgentEvent'
+          cursor-tool_call: '#/components/schemas/CursorAgentEvent'
+          cursor-task: '#/components/schemas/CursorAgentEvent'
+          cursor-status: '#/components/schemas/CursorAgentEvent'
+          cursor-error: '#/components/schemas/CursorAgentEvent'
+          opencode-message.updated: '#/components/schemas/OpencodeAgentEvent'
+          opencode-session.idle: '#/components/schemas/OpencodeAgentEvent'
+          opencode-error: '#/components/schemas/OpencodeAgentEvent'
+          opencode-part-text: '#/components/schemas/OpencodeAgentEvent'
+          opencode-part-reasoning: '#/components/schemas/OpencodeAgentEvent'
+          opencode-part-tool: '#/components/schemas/OpencodeAgentEvent'
+          pi-agent_start: '#/components/schemas/PiAgentEvent'
+          pi-message_update: '#/components/schemas/PiAgentEvent'
+          pi-tool_execution_start: '#/components/schemas/PiAgentEvent'
+          pi-tool_execution_update: '#/components/schemas/PiAgentEvent'
+          pi-tool_execution_end: '#/components/schemas/PiAgentEvent'
+          pi-error: '#/components/schemas/PiAgentEvent'
+    QueueMutationResponse:
+      type: object
+      description: Result of a queue mutation.
+      properties:
+        success:
+          type: boolean
+          description: Whether the queue mutation changed the queue.
+        queue:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueuedMessageInfo'
+      required:
+      - success
+      - queue
+    SlashCommandsResponse:
+      type: object
+      description: Available slash commands for a chat
+      properties:
+        commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlashCommand'
+      required:
+      - commands
+    DeleteReplicaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the deletion was successful
+      required:
+      - success
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: Service unavailable - The service is temporarily overloaded or under maintenance
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadGateway:
+      description: Bad gateway - The workspace is unreachable or returned an invalid response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict - Resource already exists or operation conflicts with current state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

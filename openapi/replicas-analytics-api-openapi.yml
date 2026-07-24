@@ -1,0 +1,226 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Analytics
+  description: 'Read aggregated activity and usage metrics for your organization: compute minutes, workspaces created by source, and pull request throughput over a time range.'
+paths:
+  /v1/analytics/overview:
+    get:
+      operationId: getAnalyticsOverview
+      summary: Get Analytics Overview
+      description: 'Returns an aggregated overview of organization activity over a time range for organization admins: a per-bucket time series of workspaces created and pull requests opened, merged, and closed; compute-minute usage bucketed and broken down by workspace source; workspace counts grouped by source; and a summary total across the range.'
+      tags:
+      - Analytics
+      parameters:
+      - name: bucket
+        in: query
+        required: false
+        description: Time bucket granularity for the returned series. Defaults to `day`.
+        schema:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          default: day
+      - name: start
+        in: query
+        required: false
+        description: Inclusive start of the range as an ISO 8601 timestamp. Defaults to 30 days before `end`.
+        schema:
+          type: string
+          format: date-time
+      - name: end
+        in: query
+        required: false
+        description: Exclusive end of the range as an ISO 8601 timestamp. Defaults to the current time.
+        schema:
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsOverview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    AnalyticsOverview:
+      type: object
+      description: Aggregated activity and usage metrics for an organization over a time range
+      properties:
+        bucket:
+          type: string
+          enum:
+          - day
+          - week
+          - month
+          description: Time bucket granularity of the returned series
+        start:
+          type: string
+          format: date-time
+          description: Inclusive start of the range as an ISO 8601 timestamp
+        end:
+          type: string
+          format: date-time
+          description: Exclusive end of the range as an ISO 8601 timestamp
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsTimeSeriesPoint'
+        summary:
+          $ref: '#/components/schemas/AnalyticsSummary'
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsSourceCount'
+        usage:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsUsagePoint'
+      required:
+      - bucket
+      - start
+      - end
+      - points
+      - summary
+      - sources
+      - usage
+    AnalyticsSourceCount:
+      type: object
+      description: Count of workspaces created from a given source
+      properties:
+        source:
+          type: string
+          description: Workspace source (e.g. dashboard, api, automation, slack, linear, github, gitlab)
+        count:
+          type: integer
+      required:
+      - source
+      - count
+    AnalyticsUsagePoint:
+      type: object
+      description: Compute minutes for a single time bucket, broken down by workspace source
+      properties:
+        bucket:
+          type: string
+          description: Bucket start as an ISO 8601 date (e.g. 2026-07-14)
+        bySource:
+          type: object
+          description: Map of workspace source to compute minutes in this bucket
+          additionalProperties:
+            type: number
+      required:
+      - bucket
+      - bySource
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    AnalyticsSummary:
+      type: object
+      description: Totals across the requested range
+      properties:
+        workspacesCreated:
+          type: integer
+        prsOpened:
+          type: integer
+        prsMerged:
+          type: integer
+        prsClosed:
+          type: integer
+        computeMinutes:
+          type: number
+          description: Total metered agent runtime in minutes across all workspace sources
+      required:
+      - workspacesCreated
+      - prsOpened
+      - prsMerged
+      - prsClosed
+      - computeMinutes
+    AnalyticsTimeSeriesPoint:
+      type: object
+      description: Activity counts for a single time bucket
+      properties:
+        bucket:
+          type: string
+          description: Bucket start as an ISO 8601 date (e.g. 2026-07-14)
+        workspacesCreated:
+          type: integer
+        prsOpened:
+          type: integer
+        prsMerged:
+          type: integer
+        prsClosed:
+          type: integer
+      required:
+      - bucket
+      - workspacesCreated
+      - prsOpened
+      - prsMerged
+      - prsClosed
+  responses:
+    Forbidden:
+      description: Forbidden - The authenticated account cannot access this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

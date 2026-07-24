@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Downloads API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Downloads
+  description: Download Replicas applications
+paths:
+  /v1/desktop/download/macos/{arch}:
+    get:
+      operationId: downloadMacDesktopApp
+      summary: Download Replicas for macOS
+      description: Redirects to a short-lived download URL for the latest signed and notarized macOS DMG.
+      tags:
+      - Downloads
+      security: []
+      parameters:
+      - name: arch
+        in: path
+        required: true
+        description: Mac processor architecture.
+        schema:
+          type: string
+          enum:
+          - arm64
+          - x64
+      responses:
+        '302':
+          description: Redirect to the DMG download.
+          headers:
+            Location:
+              description: Short-lived object storage URL.
+              schema:
+                type: string
+                format: uri
+        '404':
+          description: Unsupported architecture.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/desktop/update/macos/{arch}/{version}:
+    get:
+      operationId: getMacDesktopUpdate
+      summary: Check for a Replicas macOS update
+      description: Returns the latest signed macOS update when it is newer than the installed version.
+      tags:
+      - Downloads
+      security: []
+      parameters:
+      - name: arch
+        in: path
+        required: true
+        description: Mac processor architecture.
+        schema:
+          type: string
+          enum:
+          - arm64
+          - x64
+      - name: version
+        in: path
+        required: true
+        description: Installed desktop app version.
+        schema:
+          type: string
+          pattern: ^[0-9]+\.[0-9]+\.[0-9]+$
+          example: 0.1.0
+      responses:
+        '200':
+          description: A newer desktop version is available.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  name:
+                    type: string
+                  notes:
+                    type: string
+                  pub_date:
+                    type: string
+                    format: date-time
+                required:
+                - url
+                - name
+                - notes
+                - pub_date
+        '204':
+          description: The installed version is current.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Unsupported architecture.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+  responses:
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

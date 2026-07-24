@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Preview API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Preview
+  description: Manage public preview URLs for workspace ports
+paths:
+  /v1/previews/{port}:
+    delete:
+      operationId: deleteAgentPreview
+      summary: Delete Preview
+      description: Unregisters a preview port for the authenticated workspace. This endpoint is intended for agent mode and requires the workspace ID header plus the workspace engine secret as a bearer token.
+      tags:
+      - Preview
+      security:
+      - engineSecret: []
+        workspaceId: []
+      parameters:
+      - name: port
+        in: path
+        description: Workspace port number to unregister.
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 65535
+      responses:
+        '200':
+          description: Preview deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePreviewResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/previews/{port}:
+    delete:
+      operationId: deleteWorkspacePreview
+      summary: Delete Workspace Preview
+      description: Unregisters a preview port for a workspace in the authenticated organization.
+      tags:
+      - Preview
+      parameters:
+      - name: workspaceId
+        in: path
+        description: Workspace UUID.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: port
+        in: path
+        description: Workspace port number to unregister.
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 65535
+      responses:
+        '200':
+          description: Preview deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletePreviewResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    DeletePreviewResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the preview was deleted
+        port:
+          type: integer
+          description: Port number that was unregistered
+      required:
+      - success
+      - port
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

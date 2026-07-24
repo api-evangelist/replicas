@@ -1,0 +1,2356 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Environments API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Environments
+  description: Manage environments — the primitive that workspaces are created from. Variables, files, skills, MCPs, warm-hooks, and warm-pools are all scoped to an environment. Every organization has a singleton Global environment whose values apply to every workspace. Personal environments are scoped to the authenticated user and can be standalone or source-backed by a team environment.
+paths:
+  /v1/environments:
+    get:
+      operationId: listEnvironments
+      summary: List Environments
+      description: Returns environments visible to the caller, including the singleton Global environment for org scope. Each record includes counts of attached variables, files, skills, and MCPs.
+      tags:
+      - Environments
+      parameters:
+      - name: scope
+        in: query
+        required: false
+        description: Filter by environment scope. `org` returns team environments, `user` returns your personal environments, `all` returns both. Defaults to `org`.
+        schema:
+          type: string
+          enum:
+          - org
+          - user
+          - all
+          default: org
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvironmentsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createEnvironment
+      summary: Create Environment
+      description: Creates a new team or personal environment. `repository_id` and `repository_set_id` are mutually exclusive; both may be omitted for an unbound environment that can back repo-less workspaces. Personal environments are visible only to the authenticated user. When `scope=user` and `source_environment_id` references a team environment, the personal environment inherits from that source instead of copying it.
+      tags:
+      - Environments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRequest'
+      responses:
+        '201':
+          description: Environment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: An environment with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{id}:
+    get:
+      operationId: getEnvironment
+      summary: Get Environment
+      description: Returns a single environment. Pass the literal string `global` for the org's singleton Global environment (auto-created on first access — no need to look up its UUID first).
+      tags:
+      - Environments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global` for the org's Global environment.
+        schema:
+          type: string
+          example: global
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      operationId: updateEnvironment
+      summary: Update Environment
+      description: Updates a non-global environment. Only provided fields are changed. `PATCH /v1/environments/global` returns 400 with a pointer to the nested resource endpoints (variables, files, skills, MCPs, warm hooks) — the Global env's metadata cannot be edited directly. Source-backed personal environments cannot change `repository_id`, `repository_set_id`, or `system_prompt`, but may set `personal_preferences`, instructions appended after the inherited system prompt. Returns 409 when an automation still references the environment in a way that blocks the requested change.
+      tags:
+      - Environments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Environment UUID. The literal `global` is rejected with 400 — see endpoint description.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentRequest'
+      responses:
+        '200':
+          description: Environment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteEnvironment
+      summary: Delete Environment
+      description: Deletes an environment. Returns 409 when an automation still references the environment, when personal environments inherit from it, or when called against the Global environment (which cannot be deleted).
+      tags:
+      - Environments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Environment UUID. The literal `global` is rejected with 409 — the Global env cannot be deleted.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Environment deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/variables:
+    get:
+      operationId: listEnvironmentVariables
+      summary: List Environment Variables
+      description: Returns every variable attached to the environment. Values are returned in plaintext (they are encrypted at rest, decrypted on read).
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global` for the org's Global environment.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvironmentVariablesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createEnvironmentVariable
+      summary: Create Environment Variable
+      description: 'Adds a new variable to the environment. Values are encrypted at rest. The `(environment, key)` pair must be unique within the org. Source-backed personal environments can override inherited variable keys only when the inherited variable has `personal_override_allowed: true`.'
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global` for the org's Global environment.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentVariableRequest'
+      responses:
+        '201':
+          description: Variable created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Admin access required to change personal override policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/variables/{id}:
+    patch:
+      operationId: updateEnvironmentVariable
+      summary: Update Environment Variable
+      description: 'Updates a variable. Only provided fields are changed. Source-backed personal environments can override inherited variable keys only when the inherited variable has `personal_override_allowed: true`.'
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: Variable UUID
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentVariableRequest'
+      responses:
+        '200':
+          description: Variable updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentVariableResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Admin access required to change personal override policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteEnvironmentVariable
+      summary: Delete Environment Variable
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: Variable UUID
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Variable deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/files:
+    get:
+      operationId: listEnvironmentFiles
+      summary: List Environment Files
+      description: Returns every file attached to the environment. Files are dropped into the workspace at the configured `path` when the workspace is provisioned.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvironmentFilesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createEnvironmentFile
+      summary: Create Environment File
+      description: Adds a new file to the environment. Maximum content size is 64 KB (65,536 bytes). The `path` is validated against allowed locations (typically under `~/`).
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentFileRequest'
+      responses:
+        '201':
+          description: File created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentFileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/files/{id}:
+    patch:
+      operationId: updateEnvironmentFile
+      summary: Update Environment File
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: File UUID
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentFileRequest'
+      responses:
+        '200':
+          description: File updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentFileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteEnvironmentFile
+      summary: Delete Environment File
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: File UUID
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: File deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/skills:
+    get:
+      operationId: listEnvironmentSkills
+      summary: List Environment Skills
+      description: Returns every skill enabled on the environment. Skills come from [skills.sh](https://skills.sh) and are installed into workspaces created from the environment.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvironmentSkillsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createEnvironmentSkill
+      summary: Enable Environment Skill
+      description: Enables a skill on the environment. Use [GET /v1/environment-skills/search](#tag/Environments/operation/searchEnvironmentSkills) to discover skills first, then enable them with this endpoint. Returns 409 if the skill (by `slug` or `source`) is already enabled on the environment.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentSkillRequest'
+      responses:
+        '201':
+          description: Skill enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentSkillResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/skills/{id}:
+    delete:
+      operationId: deleteEnvironmentSkill
+      summary: Disable Environment Skill
+      description: Disables a previously enabled skill on the environment.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: Environment skill UUID (the membership row, not the skill catalog slug).
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Skill disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/skills-registries:
+    get:
+      operationId: listEnvironmentSkillsRegistries
+      summary: List Skill Registries
+      description: Returns every skill registry configured on the environment, along with the discovered skills from each registry repository.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvironmentSkillsRegistriesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createEnvironmentSkillsRegistry
+      summary: Add Skill Registry
+      description: Adds a GitHub repository as a skill registry on the environment. Skills discovered in the repository are installed into workspaces at provisioning time.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: GitHub repository URL (e.g. https://github.com/org/skills-repo).
+              required:
+              - url
+      responses:
+        '200':
+          description: Registry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEnvironmentSkillsRegistryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/skills-registries/{skillsRegistryId}:
+    delete:
+      operationId: deleteEnvironmentSkillsRegistry
+      summary: Remove Skill Registry
+      description: Removes a skill registry from the environment.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: skillsRegistryId
+        in: path
+        required: true
+        description: Skills registry UUID.
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Registry removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/repo-skills:
+    get:
+      operationId: listRepoSkills
+      summary: List Skills From Bound Repo
+      description: 'Returns skills, agents, commands, prompts, and rule files committed to the repository (or repository set) the environment is bound to. Resolved live from the repo''s default branch via GitHub. Read-only: these are sourced from the user''s git tree, not from `skills.sh`. When the environment is not bound to a repo, returns an empty list with no error.'
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response. `error` is populated when discovery encountered a partial failure (e.g. the repo has no GitHub App installation); the UI surfaces it inline rather than treating it as a 5xx.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRepoSkillsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/mcps:
+    get:
+      operationId: listEnvironmentMcps
+      summary: List Environment MCPs
+      description: Returns every MCP (Model Context Protocol server) attached to the environment.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEnvironmentMcpsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createEnvironmentMcp
+      summary: Create Environment MCP
+      description: 'Adds a new MCP server to the environment. `name` must match `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$` and cannot start with reserved prefix `replicas-`. The `config` shape depends on the `transport`: stdio uses `{ command, args, env }`; http and sse use `{ url, headers }`.'
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentMcpRequest'
+      responses:
+        '201':
+          description: MCP created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentMcpResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/mcps/{id}:
+    patch:
+      operationId: updateEnvironmentMcp
+      summary: Update Environment MCP
+      description: Updates an MCP. Only provided fields are changed. When changing `transport`, `config` is required and must match the new transport's shape.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: MCP UUID
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentMcpRequest'
+      responses:
+        '200':
+          description: MCP updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentMcpResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteEnvironmentMcp
+      summary: Delete Environment MCP
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: MCP UUID
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: MCP deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/warm-hooks:
+    get:
+      operationId: getEnvironmentWarmHooks
+      summary: Get Warm Hooks State
+      description: Returns the active warm hook (if any) and warm pool config (if any) for the environment, along with current pool counts.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWarmHooksResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/warm-hooks/save:
+    post:
+      operationId: saveEnvironmentWarmHook
+      summary: Save Warm Hook
+      description: Persists and activates the supplied script as the warm hook for the environment without running a test. Use this when you want to save quickly without waiting for a sandbox to spin up.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveWarmHookRequest'
+      responses:
+        '201':
+          description: Warm hook saved and activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveWarmHookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/warm-hooks/save-test:
+    post:
+      operationId: saveAndTestEnvironmentWarmHook
+      summary: Save and Test Warm Hook
+      description: Saves the supplied script as the active warm hook for the environment and runs it in an isolated sandbox. Always persists the new version; the response includes the test result so callers can decide whether to roll back. The endpoint takes 30–90 seconds to return because it spins up a real sandbox.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveAndTestWarmHookRequest'
+      responses:
+        '201':
+          description: Warm hook saved (test result included in body)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveAndTestWarmHookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/warm-hooks/test:
+    post:
+      operationId: testEnvironmentWarmHook
+      summary: Test Warm Hook
+      description: Runs the supplied script in an isolated sandbox without persisting it. Useful for iterating on a warm hook from the API before committing it via `save-test`. Takes 30–90 seconds to return.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestWarmHookRequest'
+      responses:
+        '200':
+          description: Test executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestWarmHookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/start-hooks:
+    get:
+      operationId: getEnvironmentStartHooks
+      summary: Get Start Hook
+      description: Returns the active start hook (if any) for the environment. Start hooks run at workspace boot, after the warm sandbox is claimed; the env-level hook runs before any repository-level start hooks defined in `replicas.json` / `replicas.yaml`.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetStartHooksResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/start-hooks/save:
+    post:
+      operationId: saveEnvironmentStartHook
+      summary: Save Start Hook
+      description: Persists and activates the supplied script as the start hook for the environment. Empty content clears the active start hook. Editing a start hook does not invalidate the warm pool — the new content is picked up automatically on the next claim, since start hooks run at workspace boot rather than during warming.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveStartHookRequest'
+      responses:
+        '201':
+          description: Start hook saved and activated, or cleared when content is empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveStartHookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/start-hooks/test:
+    post:
+      operationId: testEnvironmentStartHook
+      summary: Test Start Hook
+      description: Runs the supplied start hook script in an isolated sandbox without persisting it, and returns the full result once the hook finishes. Useful for short-lived clients (CLI, scripts) that prefer a single response over an SSE stream. Takes 30–90 seconds to return.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestStartHookRequest'
+      responses:
+        '200':
+          description: Test executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestStartHookResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/start-hooks/test/stream:
+    post:
+      operationId: streamTestEnvironmentStartHook
+      summary: Test Start Hook (Streaming)
+      description: 'Provisions an isolated sandbox, runs the supplied start hook script, and streams output back as Server-Sent Events. Use this instead of a synchronous test endpoint to avoid gateway timeouts on long-running hooks. Events emitted: `progress` (status messages), `output` (captured stdout/stderr), `complete` (final `exit_code` and `timed_out`), and `error` (terminal failure).'
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestStartHookRequest'
+      responses:
+        '200':
+          description: SSE stream of start hook test events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE events. Each event has `type` in {`progress`, `output`, `complete`, `error`} plus an optional `message`, `output`, `exit_code`, or `timed_out` payload.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/environments/{environmentId}/warm-pools:
+    put:
+      operationId: upsertEnvironmentWarmPool
+      summary: Enable or Disable Warm Pool
+      description: Enables or disables the warm pool for the environment. The target pool size is fixed by the platform; only `enabled` is configurable from the API.
+      tags:
+      - Environments
+      parameters:
+      - name: environmentId
+        in: path
+        required: true
+        description: Environment UUID, or the literal string `global`.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertWarmPoolConfigRequest'
+      responses:
+        '200':
+          description: Warm pool config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertWarmPoolConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/warm-pools/{configId}/workspaces:
+    get:
+      operationId: listWarmPoolWorkspaces
+      summary: List Warm Pool Workspaces
+      description: Returns the most recent pre-warmed workspaces for a warm pool config, including their status (warming, snapshotting, ready, assigned, expired, failed). Useful for inspecting why a pool is not delivering ready workspaces. Returns up to 10 entries. To watch warm-hook output live during the `warming` phase, subscribe to [GET /v1/warm-pool-workspaces/{workspaceId}/stream](#tag/Environments/operation/streamWarmPoolWorkspace).
+      tags:
+      - Environments
+      parameters:
+      - name: configId
+        in: path
+        required: true
+        description: Warm pool config UUID (from the `warm_pool.id` returned by GET `/v1/environments/{environmentId}/warm-hooks` or PUT `/v1/environments/{environmentId}/warm-pools`).
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListWarmPoolWorkspacesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/warm-pool-workspaces/{workspaceId}/stream:
+    get:
+      operationId: streamWarmPoolWorkspace
+      summary: Stream Warm Pool Workspace Updates
+      description: 'Server-Sent Events stream that delivers live warm-hook stdout/stderr plus status transitions for a single warm pool workspace. The monolith proxies output from the warming sandbox''s engine; output is only available while the sandbox is running (i.e. `status` is `warming`). Once the workspace reaches `snapshotting` the sandbox is suspended and the stream stops emitting `output` events — only status transitions and the terminal `complete` event still flow. The stream auto-closes on terminal status (`ready`, `failed`, `expired`, `assigned`). Events emitted: `output` (appended chunk), `status` (transition between `warming` and `snapshotting`), `complete` (terminal with final workspace record), and `error`.'
+      tags:
+      - Environments
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Warm pool workspace UUID (from the `id` field returned by [GET /v1/warm-pools/{configId}/workspaces](#tag/Environments/operation/listWarmPoolWorkspaces)).
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: SSE stream of warm pool workspace updates
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE events. Each event has `type` in {`output`, `status`, `complete`, `error`} plus an optional `output`, `status`, `workspace`, or `message` payload.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/environment-skills/search:
+    get:
+      operationId: searchEnvironmentSkills
+      summary: Search Skill Catalog
+      description: Searches the [skills.sh](https://skills.sh) catalog for skills that can be enabled on an environment via [POST /v1/environments/{environmentId}/skills](#tag/Environments/operation/createEnvironmentSkill).
+      tags:
+      - Environments
+      parameters:
+      - name: q
+        in: query
+        required: false
+        description: Free-text query (matched against skill name and description). Empty query returns popular skills.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchEnvironmentSkillsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    UpdateEnvironmentFileRequest:
+      type: object
+      description: Request body for updating an environment file. Only provided fields are changed.
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        content:
+          type: string
+    ListEnvironmentVariablesResponse:
+      type: object
+      properties:
+        environment_variables:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentVariable'
+      required:
+      - environment_variables
+    EnvironmentSkillResponse:
+      type: object
+      properties:
+        environment_skill:
+          $ref: '#/components/schemas/EnvironmentSkill'
+      required:
+      - environment_skill
+    CreateEnvironmentFileRequest:
+      type: object
+      description: Request body for creating an environment file. Maximum content size is 64 KB (65,536 bytes).
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+          description: Destination path inside the workspace, e.g. `~/AGENTS.md`
+        content:
+          type: string
+          description: File contents (≤ 64 KB)
+      required:
+      - name
+      - path
+      - content
+    TestStartHookResponse:
+      type: object
+      properties:
+        test:
+          $ref: '#/components/schemas/StartHookTestResult'
+      required:
+      - test
+    ListEnvironmentsResponse:
+      type: object
+      properties:
+        environments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Environment'
+      required:
+      - environments
+    CreateEnvironmentVariableRequest:
+      type: object
+      description: Request body for creating an environment variable.
+      properties:
+        key:
+          type: string
+          description: Variable name
+        value:
+          type: string
+          description: Variable value (encrypted at rest)
+        personal_override_allowed:
+          type: boolean
+          description: Team/Global variables only. Allows source-backed personal environments to override this inherited key.
+      required:
+      - key
+      - value
+    WarmHookTestResult:
+      type: object
+      description: Result of running a warm hook script in an isolated sandbox.
+      properties:
+        exit_code:
+          type: integer
+          description: Process exit code (0 = success)
+        output:
+          type: string
+          description: Captured stdout + stderr
+        timed_out:
+          type: boolean
+          description: Whether execution was killed for taking too long
+      required:
+      - exit_code
+      - output
+      - timed_out
+    EnvironmentSkillsRegistry:
+      type: object
+      description: A GitHub repository registered as a skill registry on an environment.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        repository_full_name:
+          type: string
+        default_branch:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - name
+      - url
+      - repository_full_name
+      - default_branch
+      - created_at
+      - updated_at
+    EnvironmentMcpHttpConfig:
+      type: object
+      description: 'Configuration for an MCP reached over HTTP or SSE (`transport: http` or `transport: sse`).'
+      properties:
+        url:
+          type: string
+          format: uri
+          description: MCP server URL
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Headers attached to every request (e.g. `Authorization`)
+      required:
+      - url
+      - headers
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    ListWarmPoolWorkspacesResponse:
+      type: object
+      properties:
+        workspaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/WarmPoolWorkspaceRecord'
+      required:
+      - workspaces
+    ListRepoSkillsResponse:
+      type: object
+      properties:
+        repo_skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoSkill'
+        error:
+          type:
+          - string
+          - 'null'
+          description: Populated when discovery couldn't run end-to-end (e.g. the bound repo has no GitHub App installation). The list may still be partially filled; the UI shows this as an inline banner rather than a 5xx.
+      required:
+      - repo_skills
+      - error
+    EnvironmentFileResponse:
+      type: object
+      properties:
+        environment_file:
+          $ref: '#/components/schemas/EnvironmentFile'
+      required:
+      - environment_file
+    SaveAndTestWarmHookRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Shell script to save and execute
+      required:
+      - content
+    EnvironmentSkill:
+      type: object
+      description: A skill enabled on an environment. The membership row, not the catalog entry.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Display name
+        slug:
+          type: string
+          description: Catalog slug (unique within an environment)
+        source:
+          type: string
+          description: Catalog URL or other source identifier
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - name
+      - slug
+      - source
+      - created_at
+      - updated_at
+    UpsertWarmPoolConfigRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the warm pool should be active
+      required:
+      - enabled
+    CreateEnvironmentSkillsRegistryResponse:
+      type: object
+      properties:
+        registry:
+          $ref: '#/components/schemas/EnvironmentSkillsRegistry'
+        repo_skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoSkill'
+        error:
+          type:
+          - string
+          - 'null'
+      required:
+      - registry
+      - repo_skills
+      - error
+    GetWarmHooksResponse:
+      type: object
+      properties:
+        warm_hook:
+          oneOf:
+          - $ref: '#/components/schemas/WarmHookRecord'
+          - type: 'null'
+          description: The active warm hook for the environment (null if none has ever been saved).
+        warm_pool:
+          oneOf:
+          - $ref: '#/components/schemas/WarmPoolConfigWithStats'
+          - type: 'null'
+          description: The warm pool config and current counts (null if no pool has been configured).
+      required:
+      - warm_hook
+      - warm_pool
+    TestWarmHookResponse:
+      type: object
+      properties:
+        test:
+          $ref: '#/components/schemas/WarmHookTestResult'
+      required:
+      - test
+    ListEnvironmentMcpsResponse:
+      type: object
+      properties:
+        environment_mcps:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentMcp'
+      required:
+      - environment_mcps
+    UpdateEnvironmentMcpRequest:
+      type: object
+      description: Request body for updating an MCP. Only provided fields are changed. When `transport` is changed, `config` is required and must match the new transport's shape.
+      properties:
+        name:
+          type: string
+        transport:
+          type: string
+          enum:
+          - stdio
+          - http
+          - sse
+        config:
+          $ref: '#/components/schemas/EnvironmentMcpConfig'
+    SaveAndTestWarmHookResponse:
+      type: object
+      properties:
+        warm_hook:
+          $ref: '#/components/schemas/WarmHookRecord'
+        test:
+          $ref: '#/components/schemas/WarmHookTestResult'
+      required:
+      - warm_hook
+      - test
+    UpsertWarmPoolConfigResponse:
+      type: object
+      properties:
+        warm_pool:
+          $ref: '#/components/schemas/WarmPoolConfigWithStats'
+      required:
+      - warm_pool
+    RepoSkillFramework:
+      type: string
+      description: Which AI tool owns the discovered file's on-disk convention.
+      enum:
+      - claude
+      - codex
+      - cursor
+      - agents
+    SaveStartHookRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Shell script to persist and activate. Empty content clears the active start hook.
+      required:
+      - content
+    ListEnvironmentFilesResponse:
+      type: object
+      properties:
+        environment_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentFile'
+      required:
+      - environment_files
+    SearchEnvironmentSkillsResponse:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchSkill'
+      required:
+      - skills
+    EnvironmentFile:
+      type: object
+      description: A file dropped into the workspace at the configured `path` when the workspace is provisioned.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Human-readable name
+        path:
+          type: string
+          description: Destination path inside the workspace (typically under `~/`)
+        content:
+          type: string
+          description: File contents (≤ 64 KB)
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - name
+      - path
+      - content
+      - created_at
+      - updated_at
+    StartHookTestResult:
+      type: object
+      description: Result of running a start hook script in an isolated sandbox.
+      properties:
+        exit_code:
+          type: integer
+          description: Process exit code (0 = success)
+        output:
+          type: string
+          description: Captured stdout + stderr
+        timed_out:
+          type: boolean
+          description: Whether execution was killed for taking too long
+      required:
+      - exit_code
+      - output
+      - timed_out
+    StartHookRecord:
+      type: object
+      description: A start hook — the shell script that runs at workspace boot (after the warm sandbox is claimed) for an environment.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          description: Monotonic version (newer scripts have higher versions)
+        content:
+          type: string
+          description: Shell script content
+        is_active:
+          type: boolean
+          description: Whether this version is the active one for the environment
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - version
+      - content
+      - is_active
+      - created_at
+    ListEnvironmentSkillsRegistriesResponse:
+      type: object
+      properties:
+        registries:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentSkillsRegistryWithContents'
+      required:
+      - registries
+    RepoSkill:
+      type: object
+      description: 'A skill/agent/command/prompt file discovered inside the environment''s bound repo. Distinct from `EnvironmentSkill`: these are inferred live from the repo''s git tree, are read-only, and have no DB row.'
+      properties:
+        id:
+          type: string
+          description: Stable id, formed from the repository UUID and the in-repo path.
+        repository_id:
+          type: string
+          format: uuid
+        repository_full_name:
+          type: string
+          description: Repo's `owner/name` (denormalized for the UI).
+        branch:
+          type: string
+          description: Default branch the file was resolved against.
+        path:
+          type: string
+          description: Repo-relative path of the discovered file or skill directory.
+        name:
+          type: string
+          description: Human-friendly name (from YAML frontmatter when present, otherwise the filename or directory).
+        description:
+          type:
+          - string
+          - 'null'
+          description: Single-line description, populated from frontmatter when available.
+        framework:
+          $ref: '#/components/schemas/RepoSkillFramework'
+        kind:
+          type: string
+          description: Sub-kind within the framework.
+          enum:
+          - skill
+          - agent
+          - command
+          - prompt
+          - plugin
+        html_url:
+          type: string
+          format: uri
+          description: Direct GitHub blob link.
+      required:
+      - id
+      - repository_id
+      - repository_full_name
+      - branch
+      - path
+      - name
+      - description
+      - framework
+      - kind
+      - html_url
+    SaveStartHookResponse:
+      type: object
+      properties:
+        start_hook:
+          oneOf:
+          - $ref: '#/components/schemas/StartHookRecord'
+          - type: 'null'
+          description: The saved active start hook, or null when the request cleared the active start hook.
+      required:
+      - start_hook
+    EnvironmentResponse:
+      type: object
+      properties:
+        environment:
+          $ref: '#/components/schemas/Environment'
+      required:
+      - environment
+    TestWarmHookRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Shell script to execute (not persisted)
+      required:
+      - content
+    SearchSkill:
+      type: object
+      description: A skill catalog search result.
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        source:
+          type: string
+        installs:
+          type: integer
+          description: Approximate install count from the catalog
+      required:
+      - name
+      - slug
+      - source
+      - installs
+    WarmHookRecord:
+      type: object
+      description: A warm hook — the shell script that runs while pre-warming workspaces for an environment.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          description: Monotonic version (newer scripts have higher versions)
+        content:
+          type: string
+          description: Shell script content
+        is_active:
+          type: boolean
+          description: Whether this version is the active one for the environment
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - version
+      - content
+      - is_active
+      - created_at
+    WarmPoolConfigWithStats:
+      type: object
+      description: Warm pool configuration plus current pool counts.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        enabled:
+          type: boolean
+        target_size:
+          type: integer
+          description: Target number of pre-warmed workspaces (platform-controlled)
+        generation:
+          type: integer
+          description: Monotonic counter bumped on every invalidation. Workspaces and snapshots carry the generation they were built for; anything older is stale by derivation.
+        error_count:
+          type: integer
+          description: Consecutive reconcile failures since the last success. Resets to 0 on success; drives exponential backoff via `next_retry_at`.
+        next_retry_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Earliest time the next reconcile pass may run for this config. Null when not in backoff.
+        last_error_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the most recent reconcile error was recorded (null if no current error).
+        last_error_message:
+          type:
+          - string
+          - 'null'
+          description: Most recent reconcile error message (null if no current error).
+        has_base_snapshot:
+          type: boolean
+          description: True when a base snapshot is installed for the current generation. For snapshot-capable providers (E2B), distinguishes the initial seed-build phase (false + warming > 0) from the clone-refill phase (true + warming > 0). Always false on providers without live snapshots.
+        updated_at:
+          type: string
+          format: date-time
+        ready_count:
+          type: integer
+          description: Number of pre-warmed workspaces at the current generation that are ready to be assigned
+        stale_count:
+          type: integer
+          description: Number of ready workspaces at older generations. Still claimable as a fallback; trimmed by reconcile when over target.
+        warming_count:
+          type: integer
+          description: Number of workspaces at the current generation that are currently warming (warm hooks running)
+        snapshotting_count:
+          type: integer
+          description: Number of seed workspaces currently capturing a base snapshot (E2B only). Always 0 on providers without live snapshots.
+        last_failure_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the most recent warm-up failure occurred (null if never)
+        last_failure_reason:
+          type:
+          - string
+          - 'null'
+          description: Reason for the most recent warm-up failure
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - enabled
+      - target_size
+      - generation
+      - error_count
+      - next_retry_at
+      - last_error_at
+      - last_error_message
+      - has_base_snapshot
+      - updated_at
+      - ready_count
+      - stale_count
+      - warming_count
+      - snapshotting_count
+      - last_failure_at
+      - last_failure_reason
+    WarmPoolWorkspaceRecord:
+      type: object
+      description: A single pre-warmed workspace within a warm pool.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        warm_pool_config_id:
+          type: string
+          format: uuid
+        sandbox_id:
+          type: string
+          description: Underlying sandbox/VM identifier
+        status:
+          type: string
+          enum:
+          - warming
+          - snapshotting
+          - ready
+          - assigned
+          - expired
+          - failed
+        generation:
+          type: integer
+          description: Config generation this workspace was built for. Less than the parent config's `generation` means stale by derivation.
+        error_message:
+          type:
+          - string
+          - 'null'
+          description: Error message if `status` is `failed`
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - warm_pool_config_id
+      - sandbox_id
+      - status
+      - generation
+      - error_message
+      - created_at
+    UpdateEnvironmentVariableRequest:
+      type: object
+      description: Request body for updating an environment variable. Only provided fields are changed.
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        personal_override_allowed:
+          type: boolean
+          description: Team/Global variables only. Allows source-backed personal environments to override this inherited key.
+    ListEnvironmentSkillsResponse:
+      type: object
+      properties:
+        environment_skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentSkill'
+      required:
+      - environment_skills
+    SuccessResponse:
+      type: object
+      description: Generic success response.
+      properties:
+        success:
+          type: boolean
+      required:
+      - success
+    TestStartHookRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Shell script to execute (not persisted)
+      required:
+      - content
+    EnvironmentMcpStdioConfig:
+      type: object
+      description: 'Configuration for an MCP that runs a local subprocess (`transport: stdio`).'
+      properties:
+        command:
+          type: string
+          description: Executable to run (e.g. `npx`)
+        args:
+          type: array
+          items:
+            type: string
+          description: Arguments passed to the command
+        env:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables for the subprocess
+      required:
+      - command
+      - args
+      - env
+    CreateEnvironmentMcpRequest:
+      type: object
+      description: Request body for creating an MCP. The `config` shape must match the chosen `transport`.
+      properties:
+        name:
+          type: string
+          description: 1–64 chars, `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`; reserved prefix `replicas-` is rejected.
+        transport:
+          type: string
+          enum:
+          - stdio
+          - http
+          - sse
+        config:
+          $ref: '#/components/schemas/EnvironmentMcpConfig'
+      required:
+      - name
+      - transport
+      - config
+    EnvironmentVariableResponse:
+      type: object
+      properties:
+        environment_variable:
+          $ref: '#/components/schemas/EnvironmentVariable'
+      required:
+      - environment_variable
+    Environment:
+      type: object
+      description: 'An environment — the config bundle workspaces are created from. Holds an optional repository binding plus the runtime variables, files, skills, MCPs, and warm hook applied to every workspace built from it. Every organization has a singleton Global environment (`is_global: true`) whose values are layered onto every other environment. Personal environments have `user_id` set and are visible only to their owner. Source-backed personal environments expose source-derived repository binding and system prompt values while keeping the source link in `source_environment_id`.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier
+        organization_id:
+          type: string
+          format: uuid
+          description: Owning organization
+        user_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Owning user for personal environments. Null for team environments.
+        name:
+          type: string
+          description: Human-readable name
+        description:
+          type:
+          - string
+          - 'null'
+          description: Optional description
+        is_global:
+          type: boolean
+          description: True for the org's singleton Global environment, whose values apply to every workspace. Global envs cannot be deleted, cannot be edited via PATCH, and have no repository binding.
+        repository_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Bound repository ID. Mutually exclusive with `repository_set_id`. Both null = unbound repo-less workspace.
+        repository_set_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Bound repository set ID. Mutually exclusive with `repository_id`.
+        system_prompt:
+          type:
+          - string
+          - 'null'
+          description: Optional system prompt prepended to every workspace's coding agent.
+        mobile_testing_enabled:
+          type: boolean
+          description: Whether workspaces from this environment receive mobile simulator access. Available on Team and Enterprise plans and configurable only on team environments.
+        personal_preferences:
+          type:
+          - string
+          - 'null'
+          description: User-authored instructions appended after the (inherited) system prompt. Only settable on personal environments, and editable even when source-backed.
+        source_environment_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Source team environment for source-backed personal environments. Null for standalone personal environments and team environments.
+        variable_count:
+          type: integer
+          description: Number of variables attached to this environment
+        file_count:
+          type: integer
+          description: Number of files
+        skill_count:
+          type: integer
+          description: Number of enabled skills
+        mcp_count:
+          type: integer
+          description: Number of MCPs
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - user_id
+      - name
+      - description
+      - is_global
+      - repository_id
+      - repository_set_id
+      - system_prompt
+      - mobile_testing_enabled
+      - personal_preferences
+      - source_environment_id
+      - created_at
+      - updated_at
+    EnvironmentSkillsRegistryWithContents:
+      type: object
+      description: A skill registry with its discovered skills.
+      allOf:
+      - $ref: '#/components/schemas/EnvironmentSkillsRegistry'
+      - type: object
+        properties:
+          repo_skills:
+            type: array
+            items:
+              $ref: '#/components/schemas/RepoSkill'
+          error:
+            type:
+            - string
+            - 'null'
+        required:
+        - repo_skills
+        - error
+    EnvironmentMcpConfig:
+      description: MCP transport-specific configuration. Discriminate by the parent `transport` field.
+      oneOf:
+      - $ref: '#/components/schemas/EnvironmentMcpStdioConfig'
+      - $ref: '#/components/schemas/EnvironmentMcpHttpConfig'
+    UpdateEnvironmentRequest:
+      type: object
+      description: Request body for updating an environment. Only provided fields are changed. `repository_id` and `repository_set_id` remain mutually exclusive when both are supplied.
+      properties:
+        name:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        repository_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        repository_set_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        system_prompt:
+          type:
+          - string
+          - 'null'
+        mobile_testing_enabled:
+          type: boolean
+          description: Enable or disable mobile testing. Only valid on team environments; enabling requires a Team or Enterprise plan and otherwise returns `PLAN_UPGRADE_REQUIRED`.
+        personal_preferences:
+          type:
+          - string
+          - 'null'
+          description: Only settable on personal environments. Appended after the (inherited) system prompt.
+    GetStartHooksResponse:
+      type: object
+      properties:
+        start_hook:
+          oneOf:
+          - $ref: '#/components/schemas/StartHookRecord'
+          - type: 'null'
+          description: The active start hook for the environment (null if none has ever been saved).
+      required:
+      - start_hook
+    SaveWarmHookRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Shell script to persist and activate
+      required:
+      - content
+    EnvironmentMcp:
+      type: object
+      description: An MCP (Model Context Protocol) server attached to an environment.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: MCP name (1–64 chars, must match `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$`; cannot start with reserved prefix `replicas-`)
+        transport:
+          type: string
+          enum:
+          - stdio
+          - http
+          - sse
+        config:
+          $ref: '#/components/schemas/EnvironmentMcpConfig'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - name
+      - transport
+      - config
+      - created_at
+      - updated_at
+    CreateEnvironmentRequest:
+      type: object
+      description: Request body for creating a new environment.
+      properties:
+        name:
+          type: string
+          description: Human-readable name (must be unique within the selected scope)
+        description:
+          type:
+          - string
+          - 'null'
+          description: Optional description
+        scope:
+          type: string
+          enum:
+          - org
+          - user
+          default: org
+          description: '`org` creates a team environment. `user` creates a personal environment visible only to the authenticated user.'
+        source_environment_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Optional source. Team environments copy from the source on create. Personal environments inherit from a team source and keep inherited config locked.
+        repository_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Bind to this repository. Mutually exclusive with `repository_set_id`.
+        repository_set_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: Bind to this repository set. Mutually exclusive with `repository_id`.
+        system_prompt:
+          type:
+          - string
+          - 'null'
+          description: Optional system prompt prepended to the coding agent.
+        mobile_testing_enabled:
+          type: boolean
+          default: false
+          description: Enable mobile testing. Only valid for team environments on Team and Enterprise plans; otherwise returns `PLAN_UPGRADE_REQUIRED`.
+      required:
+      - name
+    EnvironmentMcpResponse:
+      type: object
+      properties:
+        environment_mcp:
+          $ref: '#/components/schemas/EnvironmentMcp'
+      required:
+      - environment_mcp
+    EnvironmentVariable:
+      type: object
+      description: An environment variable. Values are encrypted at rest and decrypted on read.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        key:
+          type: string
+          description: Variable name (e.g. `DATABASE_URL`)
+        value:
+          type: string
+          description: Variable value (returned in plaintext)
+        personal_override_allowed:
+          type: boolean
+          description: Whether source-backed personal environments may override this inherited key
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - key
+      - value
+      - personal_override_allowed
+      - created_at
+      - updated_at
+    CreateEnvironmentSkillRequest:
+      type: object
+      description: Request body for enabling a skill on an environment.
+      properties:
+        name:
+          type: string
+          description: Display name (typically copied from the catalog result)
+        slug:
+          type: string
+          description: Catalog slug
+        source:
+          type: string
+          description: Catalog URL or other source identifier
+      required:
+      - name
+      - slug
+      - source
+    SaveWarmHookResponse:
+      type: object
+      properties:
+        warm_hook:
+          $ref: '#/components/schemas/WarmHookRecord'
+      required:
+      - warm_hook
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict - Resource already exists or operation conflicts with current state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

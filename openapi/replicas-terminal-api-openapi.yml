@@ -1,0 +1,375 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Terminal API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Terminal
+  description: Manage interactive terminal sessions in active workspaces
+paths:
+  /v1/workspaces/{workspaceId}/terminal/sessions:
+    get:
+      operationId: listWorkspaceTerminalSessions
+      summary: List Terminal Sessions
+      description: Lists terminal sessions for an active workspace. Older workspaces whose engine predates terminal support return 404.
+      tags:
+      - Terminal
+      parameters:
+      - name: workspaceId
+        in: path
+        description: Workspace UUID.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Terminal sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTerminalSessionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createWorkspaceTerminalSession
+      summary: Create Terminal Session
+      description: Creates a terminal session in an active workspace, up to eight simultaneous sessions.
+      tags:
+      - Terminal
+      parameters:
+      - name: workspaceId
+        in: path
+        description: Workspace UUID.
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTerminalSessionRequest'
+      responses:
+        '201':
+          description: Terminal session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTerminalSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          description: The workspace already has eight terminal sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/terminal/sessions/{sessionId}/input:
+    post:
+      operationId: writeWorkspaceTerminalSession
+      summary: Write Terminal Input
+      description: Writes input to a running terminal session.
+      tags:
+      - Terminal
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WriteTerminalSessionRequest'
+      responses:
+        '200':
+          description: Input accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/terminal/sessions/{sessionId}/resize:
+    post:
+      operationId: resizeWorkspaceTerminalSession
+      summary: Resize Terminal Session
+      description: Resizes a running terminal session.
+      tags:
+      - Terminal
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResizeTerminalSessionRequest'
+      responses:
+        '200':
+          description: Terminal resized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalMutationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/terminal/sessions/{sessionId}:
+    delete:
+      operationId: deleteWorkspaceTerminalSession
+      summary: Delete Terminal Session
+      description: Stops and deletes a terminal session.
+      tags:
+      - Terminal
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Terminal deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TerminalMutationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/workspaces/{workspaceId}/terminal/sessions/{sessionId}/stream:
+    get:
+      operationId: streamWorkspaceTerminalSession
+      summary: Stream Terminal Output
+      description: Streams terminal output and replay data as server-sent events.
+      tags:
+      - Terminal
+      parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: sessionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Terminal output stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    ResizeTerminalSessionRequest:
+      type: object
+      properties:
+        cols:
+          type: integer
+          minimum: 2
+          maximum: 500
+        rows:
+          type: integer
+          minimum: 1
+          maximum: 200
+      required:
+      - cols
+      - rows
+    WriteTerminalSessionRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          maxLength: 65536
+        generation:
+          type: integer
+          minimum: 0
+          description: Client generation used to reset input ordering.
+        sequence:
+          type: integer
+          minimum: 0
+          description: Zero-based batch sequence within the generation.
+      required:
+      - data
+      - generation
+      - sequence
+    TerminalMutationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+      required:
+      - success
+    CreateTerminalSessionResponse:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/TerminalSession'
+      required:
+      - session
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    TerminalSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        exited:
+          type: boolean
+        exitCode:
+          type: integer
+      required:
+      - id
+      - title
+      - createdAt
+      - exited
+    CreateTerminalSessionRequest:
+      type: object
+      properties:
+        cols:
+          type: integer
+          minimum: 2
+          maximum: 500
+        rows:
+          type: integer
+          minimum: 1
+          maximum: 200
+      required:
+      - cols
+      - rows
+    ListTerminalSessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TerminalSession'
+      required:
+      - sessions
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

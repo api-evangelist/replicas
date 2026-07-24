@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Repository API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Repository
+  description: Read repositories and repository sets connected to your organization. Repositories are the underlying GitHub-connection layer; bind them to an environment to use them in workspaces.
+paths:
+  /v1/replica/repositories:
+    get:
+      operationId: listRepositories
+      summary: List Repositories
+      description: Returns a list of repositories available to your organization.
+      tags:
+      - Repository
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repositories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Repository'
+                required:
+                - repositories
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/replica/repository-sets:
+    get:
+      operationId: listRepositorySets
+      summary: List Repository Sets
+      description: Returns a list of repository sets available to your organization.
+      tags:
+      - Repository
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repository_sets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RepositorySet'
+                required:
+                - repository_sets
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    RepositorySet:
+      type: object
+      description: A named set of repositories
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the repository set
+        name:
+          type: string
+          description: Repository set name
+        description:
+          type:
+          - string
+          - 'null'
+          description: Optional description of the repository set
+        repositories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Repository'
+          description: Repositories in this set
+      required:
+      - id
+      - name
+      - description
+      - repositories
+    Repository:
+      type: object
+      description: A repository available to the organization
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the repository
+        name:
+          type: string
+          description: Repository name
+        url:
+          type: string
+          format: uri
+          description: URL to the repository
+        default_branch:
+          type: string
+          description: Default branch name (e.g. main)
+      required:
+      - id
+      - name
+      - url
+      - default_branch
+  responses:
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

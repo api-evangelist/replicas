@@ -1,0 +1,1130 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Automation API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Automation
+  description: Create and manage automations that trigger replicas on a schedule or in response to events
+paths:
+  /v1/automations:
+    get:
+      operationId: listAutomations
+      summary: List Automations
+      description: Returns a paginated list of automations for your organization.
+      tags:
+      - Automation
+      parameters:
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+      - name: limit
+        in: query
+        description: Number of items per page
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+      - name: trigger_type
+        in: query
+        description: Restrict the result set to automations that have at least one trigger of the given type. Pass `all` (or omit) to disable the filter.
+        required: false
+        schema:
+          type: string
+          enum:
+          - all
+          - cron
+          - github
+          - gitlab
+          - slack
+          - sentry
+          - custom
+      - name: enabled
+        in: query
+        description: Restrict the result set to automations matching this enabled state. Omit to include both enabled and disabled automations.
+        required: false
+        schema:
+          type: boolean
+      - name: search
+        in: query
+        description: Case-insensitive substring match against the automation name. Whitespace is trimmed before matching.
+        required: false
+        schema:
+          type: string
+      - name: scope
+        in: query
+        description: Filter by automation scope. `org` returns org-owned automations, `user` returns your personal automations, `all` returns both.
+        required: false
+        schema:
+          type: string
+          enum:
+          - org
+          - user
+          - all
+          default: org
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAutomationsResponse'
+        '400':
+          description: Invalid query parameter (e.g. unknown trigger_type)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createAutomation
+      summary: Create Automation
+      description: Creates a new automation in your organization. The automation is bound to a single environment, which determines the repository (or repository set) and resolved env vars / MCPs / skills used when the automation fires.
+      tags:
+      - Automation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAutomationRequest'
+      responses:
+        '201':
+          description: Automation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Automation limit reached for the current plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/automations/{id}:
+    get:
+      operationId: getAutomation
+      summary: Get Automation
+      description: Returns detailed information about a specific automation.
+      tags:
+      - Automation
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the automation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      operationId: updateAutomation
+      summary: Update Automation
+      description: Updates an existing automation. Only the fields provided in the request body will be updated.
+      tags:
+      - Automation
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the automation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAutomationRequest'
+      responses:
+        '200':
+          description: Automation updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteAutomation
+      summary: Delete Automation
+      description: Deletes an automation by its ID. This also deletes all associated execution history.
+      tags:
+      - Automation
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the automation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Automation deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                - success
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/automations/{id}/trigger:
+    post:
+      operationId: triggerAutomation
+      summary: Trigger Automation
+      description: Manually triggers an automation. Automations with a cron trigger can be triggered directly; automations with a GitHub `pull_request.command` trigger can be triggered against a specific pull request by passing `pr`. This creates a new workspace and execution.
+      tags:
+      - Automation
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the automation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TriggerAutomationRequest'
+      responses:
+        '200':
+          description: Automation triggered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TriggerAutomationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/automations/{id}/executions:
+    get:
+      operationId: listAutomationExecutions
+      summary: List Automation Executions
+      description: Returns a paginated list of execution history for an automation.
+      tags:
+      - Automation
+      parameters:
+      - name: id
+        in: path
+        description: The unique identifier of the automation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+          minimum: 1
+      - name: limit
+        in: query
+        description: Number of items per page
+        required: false
+        schema:
+          type: integer
+          default: 20
+          minimum: 1
+          maximum: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAutomationExecutionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/automations/webhook/{token}:
+    post:
+      operationId: fireCustomWebhookAutomation
+      summary: Fire a Custom Webhook Automation
+      description: 'Fires an automation that has a `custom` webhook trigger. The token in the URL is the secret: any caller that knows the URL can fire the automation, so this endpoint is unauthenticated by design (no API key). The request body is parsed as JSON and embedded into the automation''s prompt under `## Trigger Payload`. Non-JSON bodies are wrapped as `{ "raw": "<body>" }`. Bodies larger than 256KB are rejected. Returns `202 Accepted` once the execution is queued; disabled automations, unknown tokens, and automations without a custom trigger all return `404` without distinguishing between the three.'
+      tags:
+      - Automation
+      security: []
+      parameters:
+      - name: token
+        in: path
+        description: The automation's `webhook_token`. Treat this like an API key.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              description: Any JSON value. The full body is embedded into the automation's prompt.
+              example:
+                anything: you want
+                nested:
+                  too: true
+      responses:
+        '202':
+          description: Execution queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+                required:
+                - accepted
+        '404':
+          description: Webhook not found (bad token, disabled automation, or no custom trigger)
+        '413':
+          description: Payload too large (over 256KB)
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    WorkspaceConfig:
+      type: object
+      description: Workspace behavior configuration. Missing capabilities and preferences default to disabled.
+      properties:
+        capabilities:
+          type: object
+          description: Actions this workspace is allowed to perform. Automations snapshot this config onto each workspace they create; API-created replicas can set it at creation time.
+          properties:
+            pr_followups:
+              type: boolean
+              description: Whether matching pull requests can receive Replicas follow-up actions. Defaults to true for workspaces created from the dashboard, Slack, Linear, GitHub, or the API, and to false for workspaces created from an automation. When enabled, later CI and review-comment replies can route back to this workspace.
+          additionalProperties: true
+        preferences:
+          type: object
+          description: Workspace behavior preferences that do not grant new action permissions.
+          properties:
+            keep_open_on_pr_merge:
+              type: boolean
+              description: Whether the workspace should remain open after its last tracked PR is merged. Defaults to false.
+              default: false
+            keep_open_on_pr_close:
+              type: boolean
+              description: Whether the workspace should remain open after its last tracked PR is closed without merging. Defaults to false.
+              default: false
+          additionalProperties: true
+        provisioning_error:
+          type: object
+          description: Setup/provisioning or wake/resume failure captured when the workspace remains queryable in `error` status. Some wake/resume failures can be retried; the `error` status can also represent an unrecoverable sandbox failure.
+          properties:
+            message:
+              type: string
+              description: Underlying setup failure message, such as repository clone/auth errors.
+          additionalProperties: true
+      additionalProperties: true
+    GitLabTriggerConfig:
+      type: object
+      description: Configuration for a GitLab merge request event trigger
+      properties:
+        event:
+          type: string
+          description: The GitLab event to listen for
+          enum:
+          - merge_request.opened
+          - merge_request.updated
+          - merge_request.merged
+          - merge_request.closed
+        repository_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: 'Optional filter: only fire for events from these GitLab projects. If omitted, fires for all projects.'
+        group_pr_events:
+          type: boolean
+          description: When true, later `merge_request.opened` or `merge_request.updated` events for an MR that already has a workspace from an earlier run of this automation are routed to that workspace as a follow-up message instead of spawning a new one. Only meaningful for the opened and updated events.
+        excluded_actors:
+          type: array
+          items:
+            type: string
+          description: 'Optional exclusion list: events sent by these GitLab usernames never fire the automation. Matching is case-insensitive and ignores a leading `@`.'
+      required:
+      - event
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    CustomTriggerConfig:
+      type: object
+      description: 'Configuration for a custom webhook trigger. The config is intentionally empty: the automation''s generated `webhook_token` is the only thing that needs to be stored.'
+      properties: {}
+    UpdateAutomationRequest:
+      type: object
+      description: Request body for updating an automation. Only provided fields are updated.
+      properties:
+        name:
+          type: string
+          description: New name
+        description:
+          type: string
+          description: New description
+        triggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationTrigger'
+          description: 'Replace triggers. Duplicates are not allowed: at most one cron trigger, and at most one event-based trigger per event (e.g. two triggers for `pull_request.opened` is rejected, but `pull_request.opened` + `merge_request.opened` is fine).'
+        prompt:
+          type: string
+          description: New prompt
+        debounce_seconds:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 86400
+          description: Set or clear the per-automation debounce window in seconds. When greater than 0, bursty trigger events update one pending run for this automation and the latest payload runs after the automation stops receiving events for this many seconds. Null or 0 disables debouncing.
+        environment_id:
+          type: string
+          format: uuid
+          description: Move this automation to a different environment.
+        enabled:
+          type: boolean
+          description: Enable or disable the automation
+        workspace_lifecycle_policy:
+          type: string
+          description: New lifecycle policy
+          enum:
+          - default
+          - archive_when_done
+          - sleep_when_done
+          - delete_after_inactivity
+        workspace_auto_stop_minutes:
+          type:
+          - integer
+          - 'null'
+          description: New inactivity timeout in minutes for default keep-alive and delete_after_inactivity policies (set to null to clear)
+          minimum: 3
+          maximum: 1440
+        workspace_size:
+          type: string
+          description: New compute size for every workspace this automation fires off. `small` (2 vCPU, 8 GB memory, 20 GB disk) bills at $0.008/min; `large` (4 vCPU, 16 GB memory, 32 GB disk) bills at $0.016/min.
+          enum:
+          - small
+          - large
+        config:
+          $ref: '#/components/schemas/WorkspaceConfig'
+        agent_provider:
+          type:
+          - string
+          - 'null'
+          description: New coding agent override. Null inherits the organization default.
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          - null
+        model:
+          type:
+          - string
+          - 'null'
+          description: New model override. Requires `agent_provider` when set.
+        thinking_level:
+          type:
+          - string
+          - 'null'
+          description: New thinking/reasoning level override. `ultra` is Codex-only; `ultracode` is Claude Code-only.
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - ultra
+          - ultracode
+          - null
+        plan_mode:
+          type: boolean
+          description: Enable or disable plan mode for automation messages.
+        goal_mode:
+          type:
+          - boolean
+          - 'null'
+          description: Enable or disable Codex goal mode for automation messages. Null inherits the resolved agent default; false explicitly disables it.
+        fast_mode:
+          type:
+          - boolean
+          - 'null'
+          description: Enable or disable fast mode for automation messages. Null inherits the resolved agent default; false explicitly disables it.
+    AutomationResponse:
+      type: object
+      description: Response containing a single automation
+      properties:
+        automation:
+          $ref: '#/components/schemas/AutomationRecord'
+      required:
+      - automation
+    ListAutomationsResponse:
+      type: object
+      description: Paginated list of automations
+      properties:
+        automations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationRecord'
+        total:
+          type: integer
+          description: Total number of automations
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Number of items per page
+        totalPages:
+          type: integer
+          description: Total number of pages
+      required:
+      - automations
+      - total
+      - page
+      - limit
+      - totalPages
+    SentryTriggerConfig:
+      type: object
+      description: Configuration for a Sentry event trigger
+      properties:
+        event:
+          type: string
+          description: The Sentry event to listen for
+          enum:
+          - event_alert.triggered
+          - issue.created
+          - error.created
+        project_slugs:
+          type: array
+          items:
+            type: string
+          description: 'Optional filter: only fire for events from these Sentry project slugs. If omitted, fires for all projects.'
+        min_level:
+          type: string
+          description: Optional minimum severity level (inclusive). If omitted, fires for all levels.
+          enum:
+          - debug
+          - info
+          - warning
+          - error
+          - fatal
+      required:
+      - event
+    ListAutomationExecutionsResponse:
+      type: object
+      description: Paginated list of automation executions
+      properties:
+        executions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationExecutionRecord'
+        total:
+          type: integer
+          description: Total number of executions
+        page:
+          type: integer
+          description: Current page number
+        limit:
+          type: integer
+          description: Number of items per page
+        totalPages:
+          type: integer
+          description: Total number of pages
+      required:
+      - executions
+      - total
+      - page
+      - limit
+      - totalPages
+    AutomationExecutionRecord:
+      type: object
+      description: A record of a single automation execution
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the execution
+        automation_id:
+          type: string
+          format: uuid
+          description: The automation that was executed
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization that owns this execution
+        workspace_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The workspace created for this execution (null if not yet created)
+        triggered_at:
+          type: string
+          format: date-time
+          description: When the execution was triggered
+        trigger_payload:
+          type: object
+          description: Event data that triggered the execution
+          additionalProperties: true
+        status:
+          type: string
+          description: Current status of the execution
+          enum:
+          - pending
+          - creating
+          - running
+          - completed
+          - failed
+        config:
+          $ref: '#/components/schemas/WorkspaceConfig'
+        error:
+          type:
+          - string
+          - 'null'
+          description: Error message if the execution failed
+        completed_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: When the execution completed
+      required:
+      - id
+      - automation_id
+      - organization_id
+      - workspace_id
+      - triggered_at
+      - trigger_payload
+      - status
+      - config
+      - error
+      - completed_at
+    SlackTriggerConfig:
+      type: object
+      description: Configuration for a Slack event trigger
+      properties:
+        event:
+          type: string
+          description: The Slack event to listen for
+          enum:
+          - message
+        channel_ids:
+          type: array
+          items:
+            type: string
+          description: 'Optional filter: only fire for events from these Slack channels. If omitted, fires for all channels.'
+        group_thread_replies:
+          type: boolean
+          description: When true (default), thread replies flow to the same workspace as the root message instead of spawning new ones.
+          default: true
+      required:
+      - event
+    CronTriggerConfig:
+      type: object
+      description: Configuration for a cron (scheduled) trigger
+      properties:
+        schedule:
+          type: string
+          description: Cron expression (e.g. "0 9 * * 1-5" for weekdays at 9am UTC)
+          example: 0 9 * * 1-5
+        timezone:
+          type: string
+          description: IANA timezone for the schedule (defaults to UTC)
+          default: UTC
+          example: America/New_York
+      required:
+      - schedule
+    AutomationRecord:
+      type: object
+      description: An automation record
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the automation
+        organization_id:
+          type: string
+          format: uuid
+          description: Organization that owns this automation
+        name:
+          type: string
+          description: Human-readable name for the automation
+        description:
+          type:
+          - string
+          - 'null'
+          description: Optional description
+        triggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationTrigger'
+          description: Triggers that fire this automation
+        prompt:
+          type: string
+          description: The instruction sent to the coding agent when the automation fires
+        debounce_seconds:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 86400
+          description: Optional per-automation debounce window in seconds. When set and greater than 0, bursty trigger events update one pending run for this automation and the latest payload runs after the automation stops receiving events for this many seconds. Null or 0 disables debouncing.
+        environment_id:
+          type: string
+          format: uuid
+          description: ID of the environment this automation runs in. The environment supplies the repository (or repository set) and the env vars / MCPs / skills layered on top of the org-wide Global environment.
+        enabled:
+          type: boolean
+          description: Whether the automation is active
+        webhook_token:
+          type:
+          - string
+          - 'null'
+          description: 'Unique token for the automation''s custom webhook. Present only when a `custom` trigger is configured. The public webhook URL is `POST /v1/automations/webhook/{webhook_token}`. Treat the token like an API key: the URL alone is enough to fire the automation.'
+        cron_expression:
+          type:
+          - string
+          - 'null'
+          description: Derived cron expression (from the cron trigger, if any)
+        cron_timezone:
+          type:
+          - string
+          - 'null'
+          description: Timezone for the cron schedule
+        cron_next_fire_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+          description: Next scheduled fire time for cron automations
+        user_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: User ID for personal automations, null for org-owned automations
+        created_by:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: User who created the automation
+        workspace_lifecycle_policy:
+          type: string
+          description: Lifecycle policy for workspaces created by this automation
+          enum:
+          - default
+          - archive_when_done
+          - sleep_when_done
+          - delete_after_inactivity
+        workspace_auto_stop_minutes:
+          type:
+          - integer
+          - 'null'
+          description: Inactivity timeout in minutes (3-1440) for default keep-alive and delete_after_inactivity policies
+          minimum: 3
+          maximum: 1440
+        workspace_size:
+          type:
+          - string
+          - 'null'
+          description: Compute size for workspaces fired off by this automation. Defaults to `small` when omitted.
+          enum:
+          - small
+          - large
+          - null
+        config:
+          $ref: '#/components/schemas/WorkspaceConfig'
+        agent_provider:
+          type:
+          - string
+          - 'null'
+          description: Coding agent override for this automation. Null inherits the organization default.
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          - null
+        model:
+          type:
+          - string
+          - 'null'
+          description: Model override for this automation. Null uses the agent default.
+        thinking_level:
+          type:
+          - string
+          - 'null'
+          description: Thinking/reasoning level override for this automation. `ultra` is Codex-only; `ultracode` is Claude Code-only.
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - ultra
+          - ultracode
+          - null
+        plan_mode:
+          type: boolean
+          description: Whether automation messages run in plan mode.
+        goal_mode:
+          type:
+          - boolean
+          - 'null'
+          description: Whether automation messages are set as Codex goals. Null inherits the resolved agent default; false explicitly disables it. Only applies when the resolved agent is Codex.
+        fast_mode:
+          type:
+          - boolean
+          - 'null'
+          description: Whether automation messages run in fast mode. Null inherits the resolved agent default; false explicitly disables it.
+        created_at:
+          type: string
+          format: date-time
+          description: When the automation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the automation was last updated
+      required:
+      - id
+      - organization_id
+      - name
+      - description
+      - triggers
+      - prompt
+      - debounce_seconds
+      - environment_id
+      - enabled
+      - user_id
+      - webhook_token
+      - cron_expression
+      - cron_timezone
+      - cron_next_fire_at
+      - created_by
+      - workspace_lifecycle_policy
+      - workspace_auto_stop_minutes
+      - workspace_size
+      - config
+      - agent_provider
+      - model
+      - thinking_level
+      - plan_mode
+      - goal_mode
+      - fast_mode
+      - created_at
+      - updated_at
+    CreateAutomationRequest:
+      type: object
+      description: Request body for creating a new automation. The automation runs in a single environment specified by `environment_id`.
+      properties:
+        name:
+          type: string
+          description: Human-readable name for the automation
+        description:
+          type: string
+          description: Optional description
+        scope:
+          type: string
+          description: Automation scope. `org` (default) creates an org-owned automation visible to all members. `user` creates a personal automation scoped to the authenticated user.
+          enum:
+          - org
+          - user
+          default: org
+        triggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomationTrigger'
+          description: 'One or more triggers. Duplicates are not allowed: at most one cron trigger, and at most one event-based trigger per event (e.g. two triggers for `pull_request.opened` is rejected, but `pull_request.opened` + `merge_request.opened` is fine).'
+          minItems: 1
+        prompt:
+          type: string
+          description: The instruction sent to the coding agent when the automation fires
+        debounce_seconds:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+          maximum: 86400
+          description: Optional per-automation debounce window in seconds. When greater than 0, bursty trigger events update one pending run for this automation and the latest payload runs after the automation stops receiving events for this many seconds. Null or 0 disables debouncing.
+        environment_id:
+          type: string
+          format: uuid
+          description: ID of the environment this automation runs in. Required. The environment supplies the repository (or repository set) and resolved env vars / MCPs / skills.
+        enabled:
+          type: boolean
+          description: Whether the automation should be active (defaults to true)
+          default: true
+        workspace_lifecycle_policy:
+          type: string
+          description: Lifecycle policy for workspaces created by this automation
+          enum:
+          - default
+          - archive_when_done
+          - sleep_when_done
+          - delete_after_inactivity
+        workspace_auto_stop_minutes:
+          type: integer
+          description: Inactivity timeout in minutes for default keep-alive and delete_after_inactivity policies
+          minimum: 3
+          maximum: 1440
+        workspace_size:
+          type: string
+          description: Compute size for every workspace this automation fires off. `small` (2 vCPU, 8 GB memory, 20 GB disk) bills at $0.008/min; `large` (4 vCPU, 16 GB memory, 32 GB disk) bills at $0.016/min. Defaults to `small`.
+          enum:
+          - small
+          - large
+          default: small
+        config:
+          $ref: '#/components/schemas/WorkspaceConfig'
+        agent_provider:
+          type:
+          - string
+          - 'null'
+          description: Coding agent override. Null inherits the organization default.
+          enum:
+          - claude
+          - codex
+          - cursor
+          - opencode
+          - pi
+          - null
+        model:
+          type:
+          - string
+          - 'null'
+          description: Model override. Requires `agent_provider` when set.
+        thinking_level:
+          type:
+          - string
+          - 'null'
+          description: Thinking/reasoning level override. `ultra` is Codex-only; `ultracode` is Claude Code-only.
+          enum:
+          - low
+          - medium
+          - high
+          - xhigh
+          - max
+          - ultra
+          - ultracode
+          - null
+        plan_mode:
+          type: boolean
+          description: Run automation messages in plan mode.
+        goal_mode:
+          type:
+          - boolean
+          - 'null'
+          description: Set automation messages as Codex goals. Null inherits the resolved agent default; false explicitly disables it. Only applies when the resolved agent is Codex.
+        fast_mode:
+          type:
+          - boolean
+          - 'null'
+          description: Run automation messages in fast mode. Null inherits the resolved agent default; false explicitly disables it.
+      required:
+      - name
+      - triggers
+      - prompt
+      - environment_id
+    GitHubTriggerConfig:
+      type: object
+      description: Configuration for a GitHub event trigger
+      properties:
+        event:
+          type: string
+          description: The GitHub event to listen for
+          enum:
+          - pull_request.opened
+          - pull_request.synchronize
+          - pull_request.merged
+          - pull_request.closed
+          - pull_request.command
+        repository_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: 'Optional filter: only fire for events from these repositories. If omitted, fires for all repositories.'
+        group_pr_events:
+          type: boolean
+          description: When true, later `pull_request.opened`, `pull_request.synchronize`, or `pull_request.command` events for a PR that already has a workspace from an earlier run of this automation are routed to that workspace as a follow-up message instead of spawning a new one. Only meaningful for the opened, synchronize, and command events.
+        excluded_actors:
+          type: array
+          items:
+            type: string
+          description: 'Optional exclusion list: events sent by these GitHub usernames never fire the automation (e.g. `dependabot[bot]`). Matching is case-insensitive and ignores a leading `@`.'
+      required:
+      - event
+    AutomationTrigger:
+      type: object
+      description: A trigger that determines when an automation fires
+      properties:
+        type:
+          type: string
+          description: The trigger type
+          enum:
+          - cron
+          - github
+          - gitlab
+          - slack
+          - sentry
+          - custom
+        config:
+          description: Trigger-specific configuration. When `type` is `cron`, this is a `CronTriggerConfig`. When `type` is `github`, this is a `GitHubTriggerConfig`. When `type` is `gitlab`, this is a `GitLabTriggerConfig`. When `type` is `slack`, this is a `SlackTriggerConfig`. When `type` is `sentry`, this is a `SentryTriggerConfig`. When `type` is `custom`, this is a `CustomTriggerConfig` (empty object).
+          anyOf:
+          - $ref: '#/components/schemas/CronTriggerConfig'
+          - $ref: '#/components/schemas/GitHubTriggerConfig'
+          - $ref: '#/components/schemas/GitLabTriggerConfig'
+          - $ref: '#/components/schemas/SlackTriggerConfig'
+          - $ref: '#/components/schemas/SentryTriggerConfig'
+          - $ref: '#/components/schemas/CustomTriggerConfig'
+      required:
+      - type
+      - config
+    TriggerAutomationResponse:
+      type: object
+      description: Response after triggering an automation
+      properties:
+        execution_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the execution
+        workspace_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+          description: The workspace created for this execution
+      required:
+      - execution_id
+      - workspace_id
+    TriggerAutomationRequest:
+      type: object
+      description: Request body for manually triggering an automation
+      properties:
+        payload:
+          type: object
+          description: Optional payload to pass to the automation execution
+          additionalProperties: true
+        pr:
+          type: object
+          description: Run the automation against a specific pull request. Only allowed for automations with a GitHub `pull_request.command` trigger matching the repository. The PR context is injected into the prompt like any other PR-triggered run.
+          properties:
+            repository_id:
+              type: string
+              format: uuid
+              description: The Replicas repository UUID the pull request belongs to
+            number:
+              type: integer
+              description: The pull request number
+          required:
+          - repository_id
+          - number
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

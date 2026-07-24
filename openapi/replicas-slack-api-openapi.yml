@@ -1,0 +1,246 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Slack API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Slack
+  description: Route Slack threads to Replicas workspaces
+paths:
+  /v1/slack/threads/attach:
+    post:
+      operationId: attachSlackThread
+      summary: Attach Slack Thread
+      description: Routes a Slack thread to a workspace. Agent-mode requests can target only their authenticated workspace; use user or API-key authentication to switch a thread to another workspace.
+      tags:
+      - Slack
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlackThreadAttachRequest'
+      responses:
+        '200':
+          description: Slack thread routed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlackThreadAttachResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The workspace agent cannot route this Slack thread
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  schemas:
+    SlackThreadAttachRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: Slack channel ID containing the thread.
+        thread_ts:
+          type: string
+          description: Slack thread timestamp.
+        workspace_id:
+          type: string
+          format: uuid
+          description: Target workspace ID. Required outside agent mode.
+      required:
+      - channel_id
+      - thread_ts
+    SlackThreadAttachResponse:
+      type: object
+      properties:
+        thread:
+          $ref: '#/components/schemas/SlackThreadRecord'
+        workspace:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+          required:
+          - id
+          - name
+      required:
+      - thread
+      - workspace
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    SlackThreadRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        slack_team_id:
+          type: string
+        channel_id:
+          type: string
+        thread_ts:
+          type: string
+        workspace_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        status:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/SlackThreadMetadata'
+        last_processed_message_ts:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - slack_team_id
+      - channel_id
+      - thread_ts
+      - workspace_id
+      - status
+      - metadata
+      - last_processed_message_ts
+      - created_at
+      - updated_at
+    SlackThreadMetadata:
+      type: object
+      properties:
+        channel_id:
+          type: string
+        channel_name:
+          type: string
+        thread_ts:
+          type: string
+        message_ts:
+          type: string
+        original_message:
+          type: string
+        user_id:
+          type: string
+        user_name:
+          type: string
+        images:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        workspace_target:
+          type: object
+          properties:
+            label:
+              type: string
+          required:
+          - label
+        workspace:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            coding_agent:
+              type: string
+            task_description:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+          required:
+          - id
+          - task_description
+          - created_at
+      required:
+      - channel_id
+      - thread_ts
+      - original_message
+      - user_id
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict - Resource already exists or operation conflicts with current state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.

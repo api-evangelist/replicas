@@ -1,0 +1,412 @@
+openapi: 3.1.0
+info:
+  title: Replica Analytics Google Search Console API
+  version: 2.0.0
+  description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
+servers:
+- url: https://api.tryreplicas.com
+  description: Production API
+security:
+- apiKey: []
+tags:
+- name: Google Search Console
+  description: Read Search Console properties, performance, sitemaps, and URL inspection results through a connected Google account
+paths:
+  /v1/gdrive/search-console/sites:
+    get:
+      operationId: listSearchConsoleSites
+      summary: List Search Console Properties
+      description: Lists Search Console properties available to the connected Google account.
+      tags:
+      - Google Search Console
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      responses:
+        '200':
+          description: Accessible Search Console properties
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteEntry:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        siteUrl:
+                          type: string
+                        permissionLevel:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          description: No Google account is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/gdrive/search-console/site:
+    get:
+      operationId: getSearchConsoleSite
+      summary: Get Search Console Property
+      description: Returns the connected account's permission level for a Search Console property.
+      tags:
+      - Google Search Console
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      parameters:
+      - name: siteUrl
+        in: query
+        required: true
+        description: Search Console property identifier, such as `sc-domain:example.com` or `https://example.com/`.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Search Console property
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteUrl:
+                    type: string
+                  permissionLevel:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          description: No Google account is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/gdrive/search-console/search-analytics/query:
+    post:
+      operationId: querySearchConsoleAnalytics
+      summary: Query Search Performance
+      description: Queries clicks, impressions, CTR, and average position for a Search Console property.
+      tags:
+      - Google Search Console
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      parameters:
+      - name: siteUrl
+        in: query
+        required: true
+        description: Search Console property identifier.
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                dimensions:
+                  type: array
+                  items:
+                    type: string
+                type:
+                  type: string
+                  enum:
+                  - web
+                  - image
+                  - video
+                  - news
+                  - discover
+                  - googleNews
+                dimensionFilterGroups:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                aggregationType:
+                  type: string
+                dataState:
+                  type: string
+                rowLimit:
+                  type: integer
+                  minimum: 1
+                  maximum: 25000
+                startRow:
+                  type: integer
+                  minimum: 0
+              required:
+              - startDate
+              - endDate
+      responses:
+        '200':
+          description: Search performance rows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        keys:
+                          type: array
+                          items:
+                            type: string
+                        clicks:
+                          type: number
+                        impressions:
+                          type: number
+                        ctr:
+                          type: number
+                        position:
+                          type: number
+                  responseAggregationType:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          description: No Google account is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/gdrive/search-console/sitemaps:
+    get:
+      operationId: listSearchConsoleSitemaps
+      summary: List Search Console Sitemaps
+      description: Lists sitemaps submitted for a Search Console property.
+      tags:
+      - Google Search Console
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      parameters:
+      - name: siteUrl
+        in: query
+        required: true
+        description: Search Console property identifier.
+        schema:
+          type: string
+      - name: sitemapIndex
+        in: query
+        required: false
+        description: URL of a sitemap index whose child sitemaps should be returned.
+        schema:
+          type: string
+          format: uri
+      responses:
+        '200':
+          description: Submitted sitemaps
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sitemap:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          description: No Google account is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/gdrive/search-console/sitemap:
+    get:
+      operationId: getSearchConsoleSitemap
+      summary: Get Search Console Sitemap
+      description: Returns status and content counts for one submitted sitemap.
+      tags:
+      - Google Search Console
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      parameters:
+      - name: siteUrl
+        in: query
+        required: true
+        description: Search Console property identifier.
+        schema:
+          type: string
+      - name: feedpath
+        in: query
+        required: true
+        description: Sitemap URL.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Submitted sitemap status
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          description: No Google account is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/gdrive/search-console/url-inspection:
+    post:
+      operationId: inspectSearchConsoleUrl
+      summary: Inspect Indexed URL
+      description: Returns URL Inspection data for the version currently in Google's index. This does not run a live URL test.
+      tags:
+      - Google Search Console
+      security:
+      - apiKey: []
+      - engineSecret: []
+        workspaceId: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inspectionUrl:
+                  type: string
+                  format: uri
+                siteUrl:
+                  type: string
+                languageCode:
+                  type: string
+                  default: en-US
+              required:
+              - inspectionUrl
+              - siteUrl
+      responses:
+        '200':
+          description: URL inspection result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inspectionResult:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          description: No Google account is connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    Forbidden:
+      description: Forbidden - The authenticated account cannot access this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: API key authentication. Obtain your API key from the Replicas dashboard under Organization → Settings → API Keys.
+    engineSecret:
+      type: http
+      scheme: bearer
+      description: Workspace engine secret used by agent-mode workspace requests.
+    workspaceId:
+      type: apiKey
+      in: header
+      name: X-Workspace-Id
+      description: Workspace ID used with the engine secret for agent-mode workspace requests.
