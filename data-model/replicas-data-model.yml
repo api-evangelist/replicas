@@ -1,0 +1,76 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/replicas-openapi-original.json
+entities:
+- name: Environment
+  description: Org-scoped primitive that workspaces/replicas are created from; holds variables, files, skills, MCPs, warm/start hooks, and warm pools.
+- name: Replica
+  aliases: [Workspace]
+  description: A cloud sandbox where a coding agent runs; created from an Environment against a Repository or RepositorySet.
+- name: Chat
+  description: A conversation thread within a replica; carries messages and a queue.
+- name: Automation
+  description: A rule that fires agents on a schedule or webhook event, bound to a single Environment.
+- name: AutomationExecution
+  description: A single run of an Automation.
+- name: Repository
+  description: A connected source repository.
+- name: RepositorySet
+  description: A named grouping of repositories.
+- name: EnvironmentVariable
+  description: Encrypted key/value bound to an Environment.
+- name: EnvironmentFile
+  description: File (<=64KB) provisioned into workspaces from an Environment.
+- name: EnvironmentSkill
+  description: A skill installed into workspaces (from catalog or a skills registry).
+- name: EnvironmentMcp
+  description: An MCP server config attached to an Environment.
+- name: TerminalSession
+  description: An interactive shell session inside a workspace.
+- name: ApiKey
+  description: Personal or org-scoped API key.
+relationships:
+- from: Replica
+  type: belongs_to
+  to: Environment
+  via: environment_id
+- from: Replica
+  type: belongs_to
+  to: RepositorySet
+  via: repository_set_id
+- from: Replica
+  type: has_many
+  to: Repository
+  via: repository_ids
+- from: Replica
+  type: has_many
+  to: Chat
+- from: Chat
+  type: has_many
+  to: TerminalSession
+- from: Automation
+  type: belongs_to
+  to: Environment
+  via: environment_id
+- from: Automation
+  type: has_many
+  to: AutomationExecution
+- from: RepositorySet
+  type: has_many
+  to: Repository
+- from: Environment
+  type: has_many
+  to: EnvironmentVariable
+- from: Environment
+  type: has_many
+  to: EnvironmentFile
+- from: Environment
+  type: has_many
+  to: EnvironmentSkill
+- from: Environment
+  type: has_many
+  to: EnvironmentMcp
+- from: Environment
+  type: belongs_to
+  to: Repository
+  via: repository_id

@@ -1,0 +1,30 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/replicas-openapi-original.json
+standards:
+- id: openapi-3.1
+  conforms: true
+  evidence: openapi 3.1.0 document published at docs.tryreplicas.com/openapi.json
+- id: http-bearer-auth
+  conforms: true
+  evidence: securitySchemes apiKey/engineSecret type http scheme bearer
+- id: oauth2
+  conforms: false
+  evidence: no oauth2 securityScheme declared
+- id: oidc
+  conforms: false
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: errors use a custom {error, details} JSON envelope, not application/problem+json
+- id: sse-streaming
+  conforms: true
+  evidence: multiple text/event-stream SSE endpoints (events, hook test, terminal, warm-pool)
+- id: cursor-pagination
+  conforms: true
+  evidence: list endpoints return paginated results with ordering guarantees
+- id: rfc8594-deprecation-headers
+  conforms: false
+  evidence: no Sunset/Deprecation header support documented
+- id: mcp
+  conforms: true
+  evidence: official MCP server at api.tryreplicas.com/v1/mcp (see mcp/replicas-mcp.yml)

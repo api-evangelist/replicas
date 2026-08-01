@@ -1,0 +1,29 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.tryreplicas.com/changelog
+scheme: date-based
+notes: >-
+  Continuous deployment; the changelog is dated (YYYY-MM-DD) rather than
+  semantically versioned. The API surface itself is versioned by URI path (v1).
+  Recent window captured below.
+entries:
+- date: '2026-07-21'
+  highlights: Focused workspace chat layout and more reliable workspace wakes
+- date: '2026-07-20'
+  highlights: Seamless workspace startup chats, archived restore controls, faster terminal interactions
+- date: '2026-07-19'
+  highlights: OpenCode Go, Pi coding harness, and faster engine startup
+- date: '2026-07-18'
+  highlights: Slash-command autocomplete for new workspaces
+- date: '2026-07-17'
+  highlights: Replicas for macOS, unified analytics filters, customizable profiles
+- date: '2026-07-16'
+  highlights: Workspace terminal, detached workspace services, analytics usage timestamp fix
+- date: '2026-07-15'
+  highlights: Workspace sleep, analytics polish, settings, and Slack composer updates
+- date: '2026-07-14'
+  highlights: Microsoft Foundry authentication, organization analytics dashboard
+- date: '2026-07-13'
+  highlights: Coding agent documentation, Slack archive reactions
+- date: '2026-07-12'
+  highlights: Automations now archive workspaces instead of deleting them

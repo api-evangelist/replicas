@@ -1,0 +1,57 @@
+generated: '2026-07-20'
+method: searched
+status: published
+source: https://docs.tryreplicas.com/features/mcp
+server:
+  name: replicas
+  description: >-
+    Official Replicas MCP server for managing cloud workspaces (replicas) for AI
+    coding agents from MCP clients such as Claude Desktop, Claude Code, and Poke.
+  transports:
+  - transport: http
+    kind: streamable-http
+    url: https://api.tryreplicas.com/v1/mcp
+    auth: Authorization Bearer sk_replicas_... (API key)
+  - transport: stdio
+    package: replicas-mcp
+    install: npx replicas-mcp
+    registry: npm
+    url: https://www.npmjs.com/package/replicas-mcp
+    version: 0.2.11
+tools:
+- name: create_replica
+  description: Create a new replica / cloud workspace with an initial message
+  source_operation: openapi/replicas-openapi-original.json#createReplica
+- name: list_replicas
+  description: List replicas in the organization
+  source_operation: openapi/replicas-openapi-original.json#listReplicas
+- name: get_replica
+  description: Get details of a replica
+  source_operation: openapi/replicas-openapi-original.json#getReplica
+- name: send_replica_message
+  description: Send a message to a replica's agent
+  source_operation: openapi/replicas-openapi-original.json#sendReplicaMessage
+- name: delete_replica
+  description: Delete a replica and terminate its sandbox
+  source_operation: openapi/replicas-openapi-original.json#deleteReplica
+- name: list_repositories
+  description: List repositories available to the organization
+  source_operation: openapi/replicas-openapi-original.json#listRepositories
+- name: list_repository_sets
+  description: List repository sets
+  source_operation: openapi/replicas-openapi-original.json#listRepositorySets
+- name: list_chats
+  description: List chats for a replica
+  source_operation: openapi/replicas-openapi-original.json#listReplicaChats
+- name: create_chat
+  description: Create a new chat session on a replica
+  source_operation: openapi/replicas-openapi-original.json#createReplicaChat
+- name: delete_chat
+  description: Delete a chat on a replica
+  source_operation: openapi/replicas-openapi-original.json#deleteReplicaChat
+- name: read_replica_history
+  description: Read a replica's conversation history
+  source_operation: openapi/replicas-openapi-original.json#readReplicaHistory
+- name: get_replica_hooks
+  description: Read a replica's hook execution logs
+  source_operation: openapi/replicas-openapi-original.json#getReplicaHooks

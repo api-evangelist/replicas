@@ -1,0 +1,41 @@
+generated: '2026-07-20'
+method: searched
+type: Webhooks
+source:
+- https://docs.tryreplicas.com/features/automations
+- openapi/replicas-openapi-original.json
+notes: >-
+  Replicas publishes no AsyncAPI document. It exposes an event/webhook surface in
+  two directions: (1) INBOUND automation triggers - automations fire agents in
+  response to external webhook events; (2) OUTBOUND SSE event streams and a
+  per-replica delivery webhook. Captured here as a Webhooks catalog.
+inbound_triggers:
+- source: github
+  detail: GitHub events (e.g. pull_request.command) trigger automations
+- source: gitlab
+  detail: GitLab events trigger automations
+- source: slack
+  detail: Slack events trigger automations
+- source: sentry
+  detail: Sentry events trigger automations
+- source: cron
+  detail: Scheduled (cron) automation triggers
+- source: custom
+  detail: >-
+    Custom webhook trigger fired via POST /v1/automations/webhook/{token}
+    (fireCustomWebhookAutomation); the URL token is the secret and the endpoint
+    is unauthenticated by design. Request JSON is embedded into the automation prompt.
+  operation: openapi/replicas-openapi-original.json#fireCustomWebhookAutomation
+outbound:
+- kind: delivery-webhook
+  detail: createReplica accepts a webhook_url (ReplicaWebhookConfig) for delivery callbacks.
+  operation: openapi/replicas-openapi-original.json#createReplica
+- kind: sse-stream
+  detail: streamReplicaEvents streams real-time replica events over SSE.
+  operation: openapi/replicas-openapi-original.json#streamReplicaEvents
+- kind: sse-stream
+  detail: streamWorkspaceTerminalSession streams terminal output over SSE.
+  operation: openapi/replicas-openapi-original.json#streamWorkspaceTerminalSession
+- kind: sse-stream
+  detail: streamWarmPoolWorkspace streams warm-hook stdout/stderr and status transitions.
+  operation: openapi/replicas-openapi-original.json#streamWarmPoolWorkspace

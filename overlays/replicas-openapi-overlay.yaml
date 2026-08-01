@@ -1,0 +1,24 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Replicas
+  version: 1.0.0
+extends: openapi/replicas-openapi-original.json
+actions:
+- target: $.info
+  update:
+    x-apievangelist-provider: replicas
+    x-apievangelist-mcp: https://api.tryreplicas.com/v1/mcp
+    x-apievangelist-error-envelope: '{error, details} (custom JSON, not RFC 9457)'
+    x-apievangelist-versioning: uri-path v1
+    x-apievangelist-changelog: https://docs.tryreplicas.com/changelog
+- target: $.info
+  update:
+    x-apievangelist-artifacts:
+      authentication: authentication/replicas-authentication.yml
+      conventions: conventions/replicas-conventions.yml
+      errors: errors/replicas-problem-types.yml
+      lifecycle: lifecycle/replicas-lifecycle.yml
+      data_model: data-model/replicas-data-model.yml
+      webhooks: asyncapi/replicas-webhooks.yml
+      mcp: mcp/replicas-mcp.yml
+      cli: cli/replicas-cli.yml

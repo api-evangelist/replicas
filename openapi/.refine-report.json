@@ -1,0 +1,38 @@
+{
+  "provider": "replicas",
+  "sources": [
+    "replicas-analytics-api-openapi.yml",
+    "replicas-api-keys-api-openapi.yml",
+    "replicas-automation-api-openapi.yml",
+    "replicas-credentials-api-openapi.yml",
+    "replicas-downloads-api-openapi.yml",
+    "replicas-environments-api-openapi.yml",
+    "replicas-google-search-console-api-openapi.yml",
+    "replicas-preview-api-openapi.yml",
+    "replicas-profile-api-openapi.yml",
+    "replicas-replica-api-openapi.yml",
+    "replicas-repository-api-openapi.yml",
+    "replicas-slack-api-openapi.yml",
+    "replicas-terminal-api-openapi.yml"
+  ],
+  "outputs": [
+    "replicas-analytics-api-openapi.yml",
+    "replicas-api-keys-api-openapi.yml",
+    "replicas-automation-api-openapi.yml",
+    "replicas-credentials-api-openapi.yml",
+    "replicas-downloads-api-openapi.yml",
+    "replicas-environments-api-openapi.yml",
+    "replicas-google-search-console-api-openapi.yml",
+    "replicas-preview-api-openapi.yml",
+    "replicas-profile-api-openapi.yml",
+    "replicas-replica-api-openapi.yml",
+    "replicas-repository-api-openapi.yml",
+    "replicas-slack-api-openapi.yml",
+    "replicas-terminal-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

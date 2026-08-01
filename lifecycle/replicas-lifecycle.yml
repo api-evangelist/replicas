@@ -1,0 +1,27 @@
+generated: '2026-07-20'
+method: searched
+source:
+- https://docs.tryreplicas.com/changelog
+- openapi/replicas-openapi-original.json
+versioning:
+  scheme: uri-path
+  current: v1
+  detail: API paths are namespaced under /v1/. OpenAPI info version is 2.0.0.
+changelog:
+  url: https://docs.tryreplicas.com/changelog
+  scheme: date-based
+deprecation:
+  policy_url: null
+  sunset_header: false
+  detail: No formal deprecation policy or RFC 8594 Sunset/Deprecation header support documented.
+status_page:
+  url: null
+  detail: >-
+    No claimed public status page found (probed status.tryreplicas.com 404;
+    replicas.instatus.com redirects to the vendor, i.e. unclaimed).
+sla:
+  url: null
+deprecated_operations: []
+notes: >-
+  Early-stage provider (YC Spring 2026). Ships continuously with a dated
+  changelog; no formal deprecation/SLA/status-page surface yet.

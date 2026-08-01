@@ -1,0 +1,58 @@
+generated: '2026-07-20'
+method: derived
+source: openapi/replicas-openapi-original.json
+format: custom-json
+envelope:
+  media_type: application/json
+  schema: '#/components/schemas/Error'
+  shape: '{ "error": "<message>", "details": "<optional additional detail or null>" }'
+  required: [error]
+notes: >-
+  Replicas does NOT use RFC 9457 application/problem+json. Errors are returned as
+  a simple JSON envelope {error, details}. The catalog below is derived from the
+  status codes actually used across the 99 documented operations.
+problems:
+- status: 400
+  title: Bad Request
+  meaning: Invalid or malformed request body/parameters (e.g. mutually exclusive fields, validation failures).
+  occurrences: 62
+- status: 401
+  title: Unauthorized
+  meaning: Missing or invalid API key / bearer token.
+  occurrences: 96
+- status: 403
+  title: Forbidden
+  meaning: Authenticated but not permitted (e.g. non-admin calling an org-admin endpoint).
+  occurrences: 13
+- status: 404
+  title: Not Found
+  meaning: Referenced replica, environment, automation, chat, or resource does not exist.
+  occurrences: 58
+- status: 409
+  title: Conflict
+  meaning: State conflict (e.g. deleting an environment still referenced by an automation; duplicate unique key).
+  occurrences: 18
+- status: 412
+  title: Precondition Failed
+  meaning: A required precondition on the resource was not met.
+  occurrences: 6
+- status: 413
+  title: Payload Too Large
+  meaning: Request body exceeds allowed size (e.g. environment file over 64 KB).
+  occurrences: 1
+- status: 429
+  title: Too Many Requests
+  meaning: Rate limit exceeded.
+  occurrences: 1
+- status: 500
+  title: Internal Server Error
+  meaning: Unexpected server-side error.
+  occurrences: 98
+- status: 502
+  title: Bad Gateway
+  meaning: Upstream/engine proxy error (streaming and workspace-engine endpoints).
+  occurrences: 8
+- status: 503
+  title: Service Unavailable
+  meaning: Workspace or engine temporarily unavailable (e.g. sandbox waking/warming).
+  occurrences: 3

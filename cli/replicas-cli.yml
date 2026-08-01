@@ -1,0 +1,56 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.tryreplicas.com/features/cli
+name: replicas
+binary: replicas
+description: >-
+  First-party Replicas CLI to create, connect to, and drive cloud workspaces
+  (replicas) from your terminal.
+install:
+- method: curl
+  command: curl -fsSL https://tryreplicas.com/install.sh | bash
+auth:
+- command: login
+  description: Opens a browser to authenticate with your Replicas account
+- command: codex-auth
+  description: Connect a Codex coding-agent OAuth account to your organization
+- command: claude-auth
+  description: Connect a Claude coding-agent OAuth account to your organization
+commands:
+- name: list
+  description: Show all replicas with status, repository, and pull request info
+- name: get
+  description: Display detailed information about a specific replica
+- name: create
+  description: Create a new replica workspace with an initial message
+- name: send
+  description: Deliver a follow-up message to an existing replica
+- name: delete
+  description: Remove a replica workspace
+- name: read
+  description: Retrieve the conversation history of a replica
+- name: repos
+  description: List all repositories available in your organization
+- name: env
+  aliases: [environment]
+  description: Manage environments, variables, files, hooks, and configurations
+- name: learnings
+  description: Read, add, update, or delete durable organizational knowledge
+- name: slack
+  description: Attach Slack threads to workspaces for message routing
+- name: preview
+  description: Register workspace ports as public URLs
+- name: service
+  description: Start and manage long-lived detached processes
+- name: computer
+  description: Drive the workspace's Linux desktop and browser automation
+- name: interact
+  description: Launch an interactive terminal UI dashboard for workspace management
+- name: automation
+  description: Manage automations with triggers and schedules
+- name: connect
+  description: Open an interactive SSH session to the workspace
+- name: code
+  description: Open workspace in VS Code via Remote SSH
+- name: org
+  description: Switch between organizations

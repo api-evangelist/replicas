@@ -1,0 +1,51 @@
+generated: '2026-07-20'
+method: searched
+source:
+- openapi/replicas-openapi-original.json
+- https://docs.tryreplicas.com/features/api
+authentication:
+  style: bearer
+  detail: >-
+    Authorization: Bearer sk_replicas_... (API key). See
+    authentication/replicas-authentication.yml. Agent-mode workspace requests use
+    an engine secret + X-Workspace-Id header.
+pagination:
+  style: cursor
+  detail: >-
+    List endpoints (listReplicas, listAutomations, listPersonalApiKeys,
+    listAutomationExecutions, readReplicaHistory, ...) return paginated results.
+    readReplicaHistory paginates bottom-up (from the end). Ordering for
+    listReplicas is newest created_at first, except archived results ordered by
+    last_activity_at.
+idempotency:
+  supported: false
+  detail: >-
+    No Idempotency-Key header or idempotent-retry contract is documented in the
+    OpenAPI or docs. Mutations are not declared idempotent.
+streaming:
+  supported: true
+  transport: server-sent-events
+  detail: >-
+    Multiple endpoints stream via SSE: streamReplicaEvents (/replica/{id}/events),
+    streamTestEnvironmentStartHook, streamWarmPoolWorkspace,
+    streamWorkspaceTerminalSession. Long-running hook tests take 30-90s and
+    prefer SSE to avoid gateway timeouts.
+async_semantics:
+  detail: >-
+    Sleeping/archived workspaces are woken on read; responses signal waking:true
+    and ask callers to retry in 30-90s. 202/503 used for wake/warming states.
+error_envelope:
+  detail: 'Custom JSON {error, details}; not RFC 9457. See errors/replicas-problem-types.yml'
+rate_limiting:
+  detail: >-
+    A 429 Too Many Requests response is documented but no standard RateLimit /
+    X-RateLimit / Retry-After response headers are declared in the spec.
+versioning:
+  scheme: uri-path
+  current: v1
+  detail: All endpoints are under /v1/. Product changes shipped continuously via a dated changelog.
+webhooks:
+  detail: >-
+    Automations fire on GitHub, GitLab, Slack, Sentry, and custom webhook events;
+    createReplica accepts a webhook_url for delivery callbacks. See
+    asyncapi/replicas-webhooks.yml.

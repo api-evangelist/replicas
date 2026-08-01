@@ -1,0 +1,27 @@
+generated: '2026-07-20'
+method: searched
+source: https://www.npmjs.com/package/replicas-mcp
+notes: >-
+  Replicas ships no traditional multi-language client SDK library. Its
+  first-party distributables are the MCP server (npm: replicas-mcp) and the
+  CLI (installed via curl | bash; command surface catalogued in
+  cli/replicas-cli.yml). An unrelated npm package `replicas` (v1.0.0, no
+  description) is NOT first-party and is excluded.
+packages:
+- language: javascript
+  registry: npm
+  name: replicas-mcp
+  url: https://www.npmjs.com/package/replicas-mcp
+  install: npx replicas-mcp
+  version: 0.2.11
+  official: true
+  kind: mcp-server
+  description: Stdio MCP server for Replicas - cloud workspaces for AI coding agents.
+- language: shell
+  registry: script
+  name: replicas
+  url: https://tryreplicas.com/install.sh
+  install: curl -fsSL https://tryreplicas.com/install.sh | bash
+  official: true
+  kind: cli
+  description: First-party Replicas CLI binary.

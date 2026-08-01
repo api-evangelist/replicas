@@ -1,0 +1,30 @@
+generated: '2026-07-20'
+method: searched
+source: live probes of /.well-known/* on tryreplicas.com, api.tryreplicas.com, docs.tryreplicas.com
+notes: >-
+  No /.well-known discovery documents are published on any Replicas host - every
+  probed path returned 404. Absence recorded as valid data; no WellKnown/
+  SecurityTxt pointer emitted. Replicas does publish a responsible-disclosure
+  page (see security/replicas-vulnerability-disclosure.yml) but no
+  RFC 9116 security.txt.
+hosts:
+- host: https://tryreplicas.com
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+- host: https://api.tryreplicas.com
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+- host: https://docs.tryreplicas.com
+  documents:
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}

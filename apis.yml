@@ -1,7 +1,17 @@
 aid: replicas
 name: Replicas
-description: Replicas is a company surfaced as a portfolio company of y-combinator and added to the API
-  Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: >-
+  Replicas (tryreplicas.com), a Y Combinator (Spring 2026) company, runs
+  end-to-end background coding agents in isolated cloud sandboxes. Teams delegate
+  engineering tasks - from Slack, Linear, GitHub, GitLab, Sentry, the web
+  dashboard, a CLI, or a native macOS app - to frontier coding agents (Claude
+  Code, Codex, Cursor, OpenCode) that work in their own VM-backed workspaces with
+  databases, environment variables, files, skills, and MCP servers, then open
+  pull requests for review. The Replica API (OpenAPI 3.1, base
+  https://api.tryreplicas.com/v1, bearer API-key auth) exposes environments,
+  replicas/workspaces, chats, event streaming (SSE), repositories, automations
+  (cron + webhook triggered), and Google Search Console tooling, plus an official
+  hosted MCP server at api.tryreplicas.com/v1/mcp.
 url: https://raw.githubusercontent.com/api-evangelist/replicas/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -9,14 +19,239 @@ x-backed-by:
 - y-combinator
 x-tier: stub
 x-tier-reason: portfolio-lead
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://tryreplicas.com/opengraph-image.png
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-20'
 tags:
 - Company
-apis: []
+- AI
+- Coding Agents
+- Developer Tools
+- Automation
+- Cloud Workspaces
+- MCP
+- DevOps
+apis:
+- aid: replicas:replicas-analytics-api
+  name: Replicas Analytics API
+  description: >-
+    Read aggregated activity and usage metrics for your organization: compute minutes, workspaces created
+    by source, and pull request throughput over a time range.
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Analytics
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-analytics-api-openapi.yml
+- aid: replicas:replicas-api-keys-api
+  name: Replicas API Keys API
+  description: The API Keys API from Replicas — 2 operation(s) for api keys.
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - API Keys
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-api-keys-api-openapi.yml
+- aid: replicas:replicas-automation-api
+  name: Replicas Automation API
+  description: >-
+    Create and manage automations that trigger replicas on a schedule or in response to events
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Automation
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-automation-api-openapi.yml
+- aid: replicas:replicas-credentials-api
+  name: Replicas Credentials API
+  description: Manage coding-agent credentials for an organization or the authenticated user
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Credentials
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-credentials-api-openapi.yml
+- aid: replicas:replicas-downloads-api
+  name: Replicas Downloads API
+  description: Download Replicas applications
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Downloads
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-downloads-api-openapi.yml
+- aid: replicas:replicas-environments-api
+  name: Replicas Environments API
+  description: >-
+    Manage environments — the primitive that workspaces are created from. Variables, files, skills, MCPs,
+    warm-hooks, and warm-pools are all scoped to an environment. Every organization has a singleton Global
+    environment whose values apply to every workspace. Personal environments are scoped to the authenticated
+    user and can be standalone or source-backed by a team environment.
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Environments
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-environments-api-openapi.yml
+- aid: replicas:replicas-google-search-console-api
+  name: Replicas Google Search Console API
+  description: >-
+    Read Search Console properties, performance, sitemaps, and URL inspection results through a connected
+    Google account
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Google Search Console
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-google-search-console-api-openapi.yml
+- aid: replicas:replicas-preview-api
+  name: Replicas Preview API
+  description: Manage public preview URLs for workspace ports
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Preview
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-preview-api-openapi.yml
+- aid: replicas:replicas-profile-api
+  name: Replicas Profile API
+  description: Read and update the authenticated user's profile
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Profile
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-profile-api-openapi.yml
+- aid: replicas:replicas-replica-api
+  name: Replicas Replica API
+  description: Manage replicas (workspaces) for AI agents
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Replica
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-replica-api-openapi.yml
+- aid: replicas:replicas-repository-api
+  name: Replicas Repository API
+  description: >-
+    Read repositories and repository sets connected to your organization. Repositories are the underlying
+    GitHub-connection layer; bind them to an environment to use them in workspaces.
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Repository
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-repository-api-openapi.yml
+- aid: replicas:replicas-slack-api
+  name: Replicas Slack API
+  description: Route Slack threads to Replicas workspaces
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Slack
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-slack-api-openapi.yml
+- aid: replicas:replicas-terminal-api
+  name: Replicas Terminal API
+  description: Manage interactive terminal sessions in active workspaces
+  humanURL: https://docs.tryreplicas.com
+  baseURL: https://api.tryreplicas.com
+  tags:
+  - Terminal
+  properties:
+  - type: OpenAPI
+    url: openapi/replicas-terminal-api-openapi.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+common:
+- type: DeveloperPortal
+  url: https://docs.tryreplicas.com
+- type: Documentation
+  url: https://docs.tryreplicas.com
+- type: APIReference
+  url: https://docs.tryreplicas.com/api-reference
+- type: GettingStarted
+  url: https://docs.tryreplicas.com/features/api
+- type: SignUp
+  url: https://tryreplicas.com/auth
+- type: Pricing
+  url: https://tryreplicas.com/pricing
+- type: TermsOfService
+  url: https://tryreplicas.com/terms
+- type: PrivacyPolicy
+  url: https://tryreplicas.com/privacy
+- type: Blog
+  url: https://tryreplicas.com/blog
+- type: GitHub
+  url: https://github.com/tryreplicas
+- type: Support
+  url: mailto:founders@replicas.dev
+- type: ChangeLog
+  url: https://docs.tryreplicas.com/changelog
+- type: ChangeLog
+  url: changelog/replicas-changelog.yml
+- type: LLMsTxt
+  url: llms/replicas-llms.txt
+- type: MCPServer
+  url: mcp/replicas-mcp.yml
+- type: CLI
+  url: cli/replicas-cli.yml
+- type: Packages
+  url: packages/replicas-packages.yml
+- type: Authentication
+  url: authentication/replicas-authentication.yml
+- type: Conventions
+  url: conventions/replicas-conventions.yml
+- type: ErrorCatalog
+  url: errors/replicas-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/replicas-lifecycle.yml
+- type: Conformance
+  url: conformance/replicas-conformance.yml
+- type: DataModel
+  url: data-model/replicas-data-model.yml
+- type: Webhooks
+  url: asyncapi/replicas-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: AgenticAccess
+  url: agentic-access/replicas-agentic-access.yml
+- type: DomainSecurity
+  url: security/replicas-domain-security.yml
+- type: VulnerabilityDisclosure
+  url: security/replicas-vulnerability-disclosure.yml
+- type: Security
+  url: https://tryreplicas.com/responsible-disclosure
+x-enrichment:
+  date: '2026-07-20'
+  status: enriched
+  artifacts_added: 19
+  pass: local-v1

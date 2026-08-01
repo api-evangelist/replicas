@@ -1,0 +1,16 @@
+generated: '2026-07-20'
+method: generated
+source: openapi/replicas-openapi-original.json
+skills:
+- file: replicas-create-and-drive-replica.md
+  name: Create a replica and drive it to a pull request
+  api: openapi/replicas-openapi-original.json
+  operations: [listRepositories, listEnvironments, createReplica, sendReplicaMessage, readReplicaHistory, getReplica]
+- file: replicas-configure-environment.md
+  name: Configure an environment (variables, files, skills, MCPs)
+  api: openapi/replicas-openapi-original.json
+  operations: [createEnvironment, createEnvironmentVariable, createEnvironmentFile, createEnvironmentSkill, createEnvironmentMcp, getEnvironment]
+- file: replicas-schedule-automation.md
+  name: Create and trigger an automation
+  api: openapi/replicas-openapi-original.json
+  operations: [listEnvironments, createAutomation, triggerAutomation, listAutomationExecutions]
