@@ -1,0 +1,2551 @@
+{
+  "item": [
+    {
+      "id": "5e835c67-552a-4e20-9be6-524f5cbafaed",
+      "name": "Automation",
+      "description": {
+        "content": "Create and manage automations that trigger replicas on a schedule or in response to events",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "4d88b008-5de2-4920-a776-a8a07e7b0be4",
+          "name": "List Automations",
+          "request": {
+            "name": "List Automations",
+            "description": {
+              "content": "Returns a paginated list of automations for your organization.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of items per page"
+                },
+                {
+                  "disabled": false,
+                  "key": "trigger_type",
+                  "value": "<string>",
+                  "description": "Restrict the result set to automations that have at least one trigger of the given type. Pass `all` (or omit) to disable the filter."
+                },
+                {
+                  "disabled": false,
+                  "key": "enabled",
+                  "value": "<boolean>",
+                  "description": "Restrict the result set to automations matching this enabled state. Omit to include both enabled and disabled automations."
+                },
+                {
+                  "disabled": false,
+                  "key": "search",
+                  "value": "<string>",
+                  "description": "Case-insensitive substring match against the automation name. Whitespace is trimmed before matching."
+                },
+                {
+                  "disabled": false,
+                  "key": "scope",
+                  "value": "org",
+                  "description": "Filter by automation scope. `org` returns org-owned automations, `user` returns your personal automations, `all` returns both."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "2569dc6f-84d6-478d-afbf-0da38e14297d",
+              "name": "Successful response",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "trigger_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "enabled",
+                      "value": "<boolean>"
+                    },
+                    {
+                      "key": "search",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "org"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"automations\": [\n    {\n      \"id\": \"31ea1851-013b-1e78-4396-01aada652470\",\n      \"organization_id\": \"51d32137-4c59-f8fb-9835-4ecea2585bc8\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"triggers\": [\n        {\n          \"type\": \"cron\",\n          \"config\": {\n            \"schedule\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            },\n            \"timezone\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        },\n        {\n          \"type\": \"slack\",\n          \"config\": {\n            \"schedule\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            },\n            \"timezone\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        }\n      ],\n      \"prompt\": \"string\",\n      \"debounce_seconds\": 4977,\n      \"environment_id\": \"67b84e82-65ae-db7f-fb1c-c1e32232cd3f\",\n      \"enabled\": true,\n      \"user_id\": \"b09f9d5a-1887-b780-7a0f-b3ae58710025\",\n      \"webhook_token\": \"string\",\n      \"cron_expression\": \"string\",\n      \"cron_timezone\": \"string\",\n      \"cron_next_fire_at\": \"1989-02-24T15:58:26.986Z\",\n      \"created_by\": \"c8d50f83-fd88-018d-d424-e88169d06fb6\",\n      \"workspace_lifecycle_policy\": \"sleep_when_done\",\n      \"workspace_auto_stop_minutes\": 139,\n      \"workspace_size\": \"small\",\n      \"config\": {\n        \"capabilities\": {\n          \"pr_followups\": false,\n          \"key_0\": \"string\",\n          \"key_1\": 6421.221575002065\n        },\n        \"preferences\": {\n          \"keep_open_on_pr_merge\": false,\n          \"keep_open_on_pr_close\": false,\n          \"key_0\": 4293\n        },\n        \"provisioning_error\": {\n          \"message\": \"string\"\n        }\n      },\n      \"agent_provider\": \"null\",\n      \"model\": \"string\",\n      \"thinking_level\": \"max\",\n      \"plan_mode\": true,\n      \"goal_mode\": false,\n      \"fast_mode\": true,\n      \"created_at\": \"2025-12-27T01:56:08.925Z\",\n      \"updated_at\": \"1956-03-25T03:58:33.633Z\"\n    },\n    {\n      \"id\": \"fe62a83d-dd60-b983-4f40-0900f342f383\",\n      \"organization_id\": \"1dd1c82c-1c3b-89d2-fa16-93ce3da58fb1\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"triggers\": [\n        {\n          \"type\": \"cron\",\n          \"config\": {\n            \"schedule\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            },\n            \"timezone\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        },\n        {\n          \"type\": \"sentry\",\n          \"config\": {\n            \"schedule\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            },\n            \"timezone\": {\n              \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n            }\n          }\n        }\n      ],\n      \"prompt\": \"string\",\n      \"debounce_seconds\": 60691,\n      \"environment_id\": \"a2f1056e-e399-7c63-21dc-a35265282fff\",\n      \"enabled\": true,\n      \"user_id\": \"2f46e0d9-228b-04b2-aa80-254cf04a940f\",\n      \"webhook_token\": \"string\",\n      \"cron_expression\": \"string\",\n      \"cron_timezone\": \"string\",\n      \"cron_next_fire_at\": \"1964-12-06T12:34:56.464Z\",\n      \"created_by\": \"a0c11c30-0ceb-ac20-c81b-a330ad373ad6\",\n      \"workspace_lifecycle_policy\": \"sleep_when_done\",\n      \"workspace_auto_stop_minutes\": 972,\n      \"workspace_size\": \"null\",\n      \"config\": {\n        \"capabilities\": {\n          \"pr_followups\": true,\n          \"key_0\": 3197.783905367413\n        },\n        \"preferences\": {\n          \"keep_open_on_pr_merge\": false,\n          \"keep_open_on_pr_close\": false,\n          \"key_0\": \"string\",\n          \"key_1\": true,\n          \"key_2\": \"string\"\n        },\n        \"provisioning_error\": {\n          \"message\": \"string\",\n          \"key_0\": 7203.825733487185,\n          \"key_1\": \"string\",\n          \"key_2\": 5700\n        }\n      },\n      \"agent_provider\": \"codex\",\n      \"model\": \"string\",\n      \"thinking_level\": \"medium\",\n      \"plan_mode\": true,\n      \"goal_mode\": false,\n      \"fast_mode\": false,\n      \"created_at\": \"1979-08-07T22:45:16.538Z\",\n      \"updated_at\": \"1963-07-19T15:55:37.731Z\"\n    }\n  ],\n  \"total\": 2741,\n  \"page\": 5562,\n  \"limit\": 7969,\n  \"totalPages\": 6623\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f894e645-c202-4eba-8e2e-3aa7efb4cb9c",
+              "name": "Invalid query parameter (e.g. unknown trigger_type)",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "trigger_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "enabled",
+                      "value": "<boolean>"
+                    },
+                    {
+                      "key": "search",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "org"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "dd73c26e-a791-471a-8a23-1d0e2fbaca46",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "trigger_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "enabled",
+                      "value": "<boolean>"
+                    },
+                    {
+                      "key": "search",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "org"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1c094b2e-ab60-42d5-9efa-9fdc3a0a2d90",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "trigger_type",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "enabled",
+                      "value": "<boolean>"
+                    },
+                    {
+                      "key": "search",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "org"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a3cad4ba-4930-4c8d-8f42-ee4c46f61e7e",
+          "name": "Create Automation",
+          "request": {
+            "name": "Create Automation",
+            "description": {
+              "content": "Creates a new automation in your organization. The automation is bound to a single environment, which determines the repository (or repository set) and resolved env vars / MCPs / skills used when the automation fires.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"<string>\",\n      \"config\": {\n        \"schedule\": \"<string>\",\n        \"timezone\": \"UTC\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"environment_id\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"scope\": \"org\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"enabled\": true,\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer>\",\n  \"workspace_size\": \"small\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": \"<boolean>\",\n      \"key_0\": false,\n      \"key_1\": \"string\",\n      \"key_2\": 2483.6509108561477,\n      \"key_3\": 9706.697811386932\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false,\n      \"key_0\": \"string\"\n    },\n    \"provisioning_error\": {\n      \"message\": \"<string>\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "c6891559-2880-4bdd-9957-2b8c5db92850",
+              "name": "Automation created successfully",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"environment_id\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"scope\": \"org\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"enabled\": true,\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer>\",\n  \"workspace_size\": \"small\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": 4382,\n      \"key_1\": 9902\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": false,\n      \"key_1\": 4382,\n      \"key_2\": \"string\",\n      \"key_3\": \"string\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"automation\": {\n    \"id\": \"defabd45-dd9c-9e23-5c94-58c4050573e9\",\n    \"organization_id\": \"223c5ab5-1cea-d0b5-cf32-61389b34fa7b\",\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"triggers\": [\n      {\n        \"type\": \"github\",\n        \"config\": {\n          \"schedule\": \"0 9 * * 1-5\",\n          \"timezone\": \"America/New_York\"\n        }\n      },\n      {\n        \"type\": \"slack\",\n        \"config\": {\n          \"schedule\": \"0 9 * * 1-5\",\n          \"timezone\": \"America/New_York\"\n        }\n      }\n    ],\n    \"prompt\": \"string\",\n    \"debounce_seconds\": 66152,\n    \"environment_id\": \"9590542b-868f-f420-8af4-e6b5ee96c264\",\n    \"enabled\": false,\n    \"user_id\": \"3e8e17fe-1387-0fc2-404a-f577a7c04292\",\n    \"webhook_token\": \"string\",\n    \"cron_expression\": \"string\",\n    \"cron_timezone\": \"string\",\n    \"cron_next_fire_at\": \"1983-05-18T13:16:23.194Z\",\n    \"created_by\": \"b40b62e2-1525-c69f-1d72-4a0c8e54890e\",\n    \"workspace_lifecycle_policy\": \"archive_when_done\",\n    \"workspace_auto_stop_minutes\": 493,\n    \"workspace_size\": \"null\",\n    \"config\": {\n      \"capabilities\": {\n        \"pr_followups\": true,\n        \"key_0\": 9086\n      },\n      \"preferences\": {\n        \"keep_open_on_pr_merge\": false,\n        \"keep_open_on_pr_close\": false,\n        \"key_0\": 9729,\n        \"key_1\": 252.8966557337664\n      },\n      \"provisioning_error\": {\n        \"message\": \"string\",\n        \"key_0\": 6585.2521805537135\n      }\n    },\n    \"agent_provider\": \"codex\",\n    \"model\": \"string\",\n    \"thinking_level\": \"ultracode\",\n    \"plan_mode\": true,\n    \"goal_mode\": true,\n    \"fast_mode\": true,\n    \"created_at\": \"1978-12-10T04:25:23.438Z\",\n    \"updated_at\": \"1969-01-20T05:12:51.550Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8d3b108e-81a3-40c6-a6c1-932201833dfc",
+              "name": "Bad request - Missing or invalid parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"environment_id\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"scope\": \"org\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"enabled\": true,\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer>\",\n  \"workspace_size\": \"small\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": 4382,\n      \"key_1\": 9902\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": false,\n      \"key_1\": 4382,\n      \"key_2\": \"string\",\n      \"key_3\": \"string\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3eae0f58-1859-4fcd-9650-dbd104c08719",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"environment_id\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"scope\": \"org\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"enabled\": true,\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer>\",\n  \"workspace_size\": \"small\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": 4382,\n      \"key_1\": 9902\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": false,\n      \"key_1\": 4382,\n      \"key_2\": \"string\",\n      \"key_3\": \"string\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ec73a799-6fc2-496b-9452-662e810eb5ee",
+              "name": "Automation limit reached for the current plan",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"environment_id\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"scope\": \"org\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"enabled\": true,\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer>\",\n  \"workspace_size\": \"small\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": 4382,\n      \"key_1\": 9902\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": false,\n      \"key_1\": 4382,\n      \"key_2\": \"string\",\n      \"key_3\": \"string\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "15b8d06b-c688-4734-b9ed-fe7e236d73a9",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"environment_id\": \"<uuid>\",\n  \"description\": \"<string>\",\n  \"scope\": \"org\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"enabled\": true,\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer>\",\n  \"workspace_size\": \"small\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": 4382,\n      \"key_1\": 9902\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": false,\n      \"key_1\": 4382,\n      \"key_2\": \"string\",\n      \"key_3\": \"string\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c8a30161-2463-43c3-9222-fb02458d2651",
+          "name": "Get Automation",
+          "request": {
+            "name": "Get Automation",
+            "description": {
+              "content": "Returns detailed information about a specific automation.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) The unique identifier of the automation"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "020b381f-5c08-4778-b732-c70f9a9d5dfe",
+              "name": "Successful response",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"automation\": {\n    \"id\": \"defabd45-dd9c-9e23-5c94-58c4050573e9\",\n    \"organization_id\": \"223c5ab5-1cea-d0b5-cf32-61389b34fa7b\",\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"triggers\": [\n      {\n        \"type\": \"github\",\n        \"config\": {\n          \"schedule\": \"0 9 * * 1-5\",\n          \"timezone\": \"America/New_York\"\n        }\n      },\n      {\n        \"type\": \"slack\",\n        \"config\": {\n          \"schedule\": \"0 9 * * 1-5\",\n          \"timezone\": \"America/New_York\"\n        }\n      }\n    ],\n    \"prompt\": \"string\",\n    \"debounce_seconds\": 66152,\n    \"environment_id\": \"9590542b-868f-f420-8af4-e6b5ee96c264\",\n    \"enabled\": false,\n    \"user_id\": \"3e8e17fe-1387-0fc2-404a-f577a7c04292\",\n    \"webhook_token\": \"string\",\n    \"cron_expression\": \"string\",\n    \"cron_timezone\": \"string\",\n    \"cron_next_fire_at\": \"1983-05-18T13:16:23.194Z\",\n    \"created_by\": \"b40b62e2-1525-c69f-1d72-4a0c8e54890e\",\n    \"workspace_lifecycle_policy\": \"archive_when_done\",\n    \"workspace_auto_stop_minutes\": 493,\n    \"workspace_size\": \"null\",\n    \"config\": {\n      \"capabilities\": {\n        \"pr_followups\": true,\n        \"key_0\": 9086\n      },\n      \"preferences\": {\n        \"keep_open_on_pr_merge\": false,\n        \"keep_open_on_pr_close\": false,\n        \"key_0\": 9729,\n        \"key_1\": 252.8966557337664\n      },\n      \"provisioning_error\": {\n        \"message\": \"string\",\n        \"key_0\": 6585.2521805537135\n      }\n    },\n    \"agent_provider\": \"codex\",\n    \"model\": \"string\",\n    \"thinking_level\": \"ultracode\",\n    \"plan_mode\": true,\n    \"goal_mode\": true,\n    \"fast_mode\": true,\n    \"created_at\": \"1978-12-10T04:25:23.438Z\",\n    \"updated_at\": \"1969-01-20T05:12:51.550Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "51931631-7c36-4f0c-aec6-355e8b39ff80",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "749a3cb7-dce0-4b7c-b23d-a3c39e4b419f",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d8e047d2-f8d1-40c1-a01c-7070295fcbeb",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "59329d2b-fab5-4cdc-99a4-af7ab97de0a5",
+          "name": "Update Automation",
+          "request": {
+            "name": "Update Automation",
+            "description": {
+              "content": "Updates an existing automation. Only the fields provided in the request body will be updated.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) The unique identifier of the automation"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"<string>\",\n      \"config\": {\n        \"schedule\": \"<string>\",\n        \"timezone\": \"UTC\"\n      }\n    },\n    {\n      \"type\": \"<string>\",\n      \"config\": {\n        \"schedule\": \"<string>\",\n        \"timezone\": \"UTC\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"environment_id\": \"<uuid>\",\n  \"enabled\": \"<boolean>\",\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer,null>\",\n  \"workspace_size\": \"<string>\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": \"<boolean>\"\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"<string>\"\n    }\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "729e81bc-051c-4157-b875-d112ee5f3ac7",
+              "name": "Automation updated successfully",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"slack\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    },\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"environment_id\": \"<uuid>\",\n  \"enabled\": \"<boolean>\",\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer,null>\",\n  \"workspace_size\": \"<string>\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": \"string\",\n      \"key_1\": \"string\"\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": true,\n      \"key_1\": false,\n      \"key_2\": 4448.030499657657,\n      \"key_3\": \"string\"\n    },\n    \"key_0\": 2606\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"automation\": {\n    \"id\": \"defabd45-dd9c-9e23-5c94-58c4050573e9\",\n    \"organization_id\": \"223c5ab5-1cea-d0b5-cf32-61389b34fa7b\",\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"triggers\": [\n      {\n        \"type\": \"github\",\n        \"config\": {\n          \"schedule\": \"0 9 * * 1-5\",\n          \"timezone\": \"America/New_York\"\n        }\n      },\n      {\n        \"type\": \"slack\",\n        \"config\": {\n          \"schedule\": \"0 9 * * 1-5\",\n          \"timezone\": \"America/New_York\"\n        }\n      }\n    ],\n    \"prompt\": \"string\",\n    \"debounce_seconds\": 66152,\n    \"environment_id\": \"9590542b-868f-f420-8af4-e6b5ee96c264\",\n    \"enabled\": false,\n    \"user_id\": \"3e8e17fe-1387-0fc2-404a-f577a7c04292\",\n    \"webhook_token\": \"string\",\n    \"cron_expression\": \"string\",\n    \"cron_timezone\": \"string\",\n    \"cron_next_fire_at\": \"1983-05-18T13:16:23.194Z\",\n    \"created_by\": \"b40b62e2-1525-c69f-1d72-4a0c8e54890e\",\n    \"workspace_lifecycle_policy\": \"archive_when_done\",\n    \"workspace_auto_stop_minutes\": 493,\n    \"workspace_size\": \"null\",\n    \"config\": {\n      \"capabilities\": {\n        \"pr_followups\": true,\n        \"key_0\": 9086\n      },\n      \"preferences\": {\n        \"keep_open_on_pr_merge\": false,\n        \"keep_open_on_pr_close\": false,\n        \"key_0\": 9729,\n        \"key_1\": 252.8966557337664\n      },\n      \"provisioning_error\": {\n        \"message\": \"string\",\n        \"key_0\": 6585.2521805537135\n      }\n    },\n    \"agent_provider\": \"codex\",\n    \"model\": \"string\",\n    \"thinking_level\": \"ultracode\",\n    \"plan_mode\": true,\n    \"goal_mode\": true,\n    \"fast_mode\": true,\n    \"created_at\": \"1978-12-10T04:25:23.438Z\",\n    \"updated_at\": \"1969-01-20T05:12:51.550Z\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "25560793-08bb-48a7-a74d-2d3ccb81a310",
+              "name": "Bad request - Missing or invalid parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"slack\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    },\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"environment_id\": \"<uuid>\",\n  \"enabled\": \"<boolean>\",\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer,null>\",\n  \"workspace_size\": \"<string>\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": \"string\",\n      \"key_1\": \"string\"\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": true,\n      \"key_1\": false,\n      \"key_2\": 4448.030499657657,\n      \"key_3\": \"string\"\n    },\n    \"key_0\": 2606\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9ccf8b3f-a718-480c-bdfb-ee1ee07b132b",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"slack\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    },\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"environment_id\": \"<uuid>\",\n  \"enabled\": \"<boolean>\",\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer,null>\",\n  \"workspace_size\": \"<string>\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": \"string\",\n      \"key_1\": \"string\"\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": true,\n      \"key_1\": false,\n      \"key_2\": 4448.030499657657,\n      \"key_3\": \"string\"\n    },\n    \"key_0\": 2606\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "54480acb-69ef-4580-a557-e8948a55ae38",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"slack\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    },\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"environment_id\": \"<uuid>\",\n  \"enabled\": \"<boolean>\",\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer,null>\",\n  \"workspace_size\": \"<string>\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": \"string\",\n      \"key_1\": \"string\"\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": true,\n      \"key_1\": false,\n      \"key_2\": 4448.030499657657,\n      \"key_3\": \"string\"\n    },\n    \"key_0\": 2606\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "06d18992-5433-4961-9485-bf9766959bf9",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"<string>\",\n  \"description\": \"<string>\",\n  \"triggers\": [\n    {\n      \"type\": \"slack\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    },\n    {\n      \"type\": \"github\",\n      \"config\": {\n        \"schedule\": \"0 9 * * 1-5\",\n        \"timezone\": \"America/New_York\"\n      }\n    }\n  ],\n  \"prompt\": \"<string>\",\n  \"debounce_seconds\": \"<integer,null>\",\n  \"environment_id\": \"<uuid>\",\n  \"enabled\": \"<boolean>\",\n  \"workspace_lifecycle_policy\": \"<string>\",\n  \"workspace_auto_stop_minutes\": \"<integer,null>\",\n  \"workspace_size\": \"<string>\",\n  \"config\": {\n    \"capabilities\": {\n      \"pr_followups\": true,\n      \"key_0\": \"string\",\n      \"key_1\": \"string\"\n    },\n    \"preferences\": {\n      \"keep_open_on_pr_merge\": false,\n      \"keep_open_on_pr_close\": false\n    },\n    \"provisioning_error\": {\n      \"message\": \"string\",\n      \"key_0\": true,\n      \"key_1\": false,\n      \"key_2\": 4448.030499657657,\n      \"key_3\": \"string\"\n    },\n    \"key_0\": 2606\n  },\n  \"agent_provider\": \"<string,null>\",\n  \"model\": \"<string,null>\",\n  \"thinking_level\": \"<string,null>\",\n  \"plan_mode\": \"<boolean>\",\n  \"goal_mode\": \"<boolean,null>\",\n  \"fast_mode\": \"<boolean,null>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9787382d-b9e2-45f2-a705-cf6c09298295",
+          "name": "Delete Automation",
+          "request": {
+            "name": "Delete Automation",
+            "description": {
+              "content": "Deletes an automation by its ID. This also deletes all associated execution history.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) The unique identifier of the automation"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "8d732a21-5739-4bed-b560-487d5d04a02a",
+              "name": "Automation deleted successfully",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1fc511ce-2224-48a5-8052-befa3384827f",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9e6812a4-44a1-4cf5-93ee-8d461aa8c127",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "386e60d9-6e6d-4f12-afdc-288329b698f8",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9e45adef-ccff-480b-bde3-248869286372",
+          "name": "Trigger Automation",
+          "request": {
+            "name": "Trigger Automation",
+            "description": {
+              "content": "Manually triggers an automation. Automations with a cron trigger can be triggered directly; automations with a GitHub `pull_request.command` trigger can be triggered against a specific pull request by passing `pr`. This creates a new workspace and execution.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations",
+                ":id",
+                "trigger"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) The unique identifier of the automation"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payload\": {\n    \"key_0\": 1514,\n    \"key_1\": false\n  },\n  \"pr\": {\n    \"repository_id\": \"<uuid>\",\n    \"number\": \"<integer>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "93c5ae46-8170-4ef2-9894-f9fb74192a36",
+              "name": "Automation triggered successfully",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "trigger"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payload\": {\n    \"key_0\": \"string\",\n    \"key_1\": false\n  },\n  \"pr\": {\n    \"repository_id\": \"<uuid>\",\n    \"number\": \"<integer>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"execution_id\": \"4112a68d-a334-1814-fd08-2796050c2a2f\",\n  \"workspace_id\": \"57b2d999-244f-2010-fe1a-361b5ecaa0a3\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "143e22b8-dea8-4a09-b014-2b6538a90621",
+              "name": "Bad request - Missing or invalid parameters",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "trigger"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payload\": {\n    \"key_0\": \"string\",\n    \"key_1\": false\n  },\n  \"pr\": {\n    \"repository_id\": \"<uuid>\",\n    \"number\": \"<integer>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9bad996f-7cd3-476f-904e-f24ef490d0bd",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "trigger"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payload\": {\n    \"key_0\": \"string\",\n    \"key_1\": false\n  },\n  \"pr\": {\n    \"repository_id\": \"<uuid>\",\n    \"number\": \"<integer>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "62f907c9-b534-4545-a6c0-06e33ab3b1c7",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "trigger"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payload\": {\n    \"key_0\": \"string\",\n    \"key_1\": false\n  },\n  \"pr\": {\n    \"repository_id\": \"<uuid>\",\n    \"number\": \"<integer>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "98290923-509c-47c0-abc1-dd5105dcf63a",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "trigger"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"payload\": {\n    \"key_0\": \"string\",\n    \"key_1\": false\n  },\n  \"pr\": {\n    \"repository_id\": \"<uuid>\",\n    \"number\": \"<integer>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "8c1653b9-fb65-4846-8e95-d58a297353ce",
+          "name": "List Automation Executions",
+          "request": {
+            "name": "List Automation Executions",
+            "description": {
+              "content": "Returns a paginated list of execution history for an automation.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations",
+                ":id",
+                "executions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of items per page"
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) The unique identifier of the automation"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "fe1b0d90-5d56-486b-8d39-ae56e99b3dbb",
+              "name": "Successful response",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "executions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"executions\": [\n    {\n      \"id\": \"307e9fa5-8e28-085a-9e05-e60580d32e6c\",\n      \"automation_id\": \"2a9a567c-cd04-4f43-06a5-1e70ef5165a4\",\n      \"organization_id\": \"1a6b9d1d-6cb2-0c02-2430-17067be1119b\",\n      \"workspace_id\": \"f4cd7c13-3fd7-d16a-8a1f-846e76d0b02a\",\n      \"triggered_at\": \"1982-11-22T04:32:53.029Z\",\n      \"trigger_payload\": {\n        \"key_0\": \"string\"\n      },\n      \"status\": \"failed\",\n      \"config\": {\n        \"capabilities\": {\n          \"pr_followups\": true,\n          \"key_0\": 6299.066727029084,\n          \"key_1\": 7357,\n          \"key_2\": false\n        },\n        \"preferences\": {\n          \"keep_open_on_pr_merge\": false,\n          \"keep_open_on_pr_close\": false\n        },\n        \"provisioning_error\": {\n          \"message\": \"string\",\n          \"key_0\": \"string\",\n          \"key_1\": \"string\"\n        },\n        \"key_0\": \"string\",\n        \"key_1\": 4345\n      },\n      \"error\": \"string\",\n      \"completed_at\": \"1954-02-07T18:29:08.889Z\"\n    },\n    {\n      \"id\": \"e3aa830c-8237-8f6f-8ef3-292d5a5ff6c7\",\n      \"automation_id\": \"e6692a4c-e317-3ffb-1695-e035bb4be04b\",\n      \"organization_id\": \"28506e68-8866-7dd2-e0ab-388fe4bac0b6\",\n      \"workspace_id\": \"0ee0b63e-ebe0-9a2a-988d-15de4843f540\",\n      \"triggered_at\": \"2022-01-10T15:06:34.373Z\",\n      \"trigger_payload\": {\n        \"key_0\": 5929.333389011626\n      },\n      \"status\": \"failed\",\n      \"config\": {\n        \"capabilities\": {\n          \"pr_followups\": true\n        },\n        \"preferences\": {\n          \"keep_open_on_pr_merge\": false,\n          \"keep_open_on_pr_close\": false\n        },\n        \"provisioning_error\": {\n          \"message\": \"string\",\n          \"key_0\": 3942.907246296984,\n          \"key_1\": 5525\n        }\n      },\n      \"error\": \"string\",\n      \"completed_at\": \"1979-07-15T17:44:37.410Z\"\n    }\n  ],\n  \"total\": 8562,\n  \"page\": 4946,\n  \"limit\": 6906,\n  \"totalPages\": 8142\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "aff5a996-e8ce-44da-a4cc-c085404ed064",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "executions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2c1ac014-9ae7-4748-a656-3b87e39b4280",
+              "name": "Resource not found",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "executions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d7d9a8b2-7db9-4cfd-aa6b-f4fb9b3a0c52",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    ":id",
+                    "executions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) The unique identifier of the automation"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "888c9da5-3a6d-4b44-b099-e46caff55ec5",
+          "name": "Fire a Custom Webhook Automation",
+          "request": {
+            "name": "Fire a Custom Webhook Automation",
+            "description": {
+              "content": "Fires an automation that has a `custom` webhook trigger. The token in the URL is the secret: any caller that knows the URL can fire the automation, so this endpoint is unauthenticated by design (no API key). The request body is parsed as JSON and embedded into the automation's prompt under `## Trigger Payload`. Non-JSON bodies are wrapped as `{ \"raw\": \"<body>\" }`. Bodies larger than 256KB are rejected. Returns `202 Accepted` once the execution is queued; disabled automations, unknown tokens, and automations without a custom trigger all return `404` without distinguishing between the three.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "automations",
+                "webhook",
+                ":token"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "token",
+                  "description": "(Required) The automation's `webhook_token`. Treat this like an API key."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "c3f1f5a0-167a-4c4c-a2ac-479dc573c37b",
+              "name": "Execution queued",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    "webhook",
+                    ":token"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) The automation's `webhook_token`. Treat this like an API key."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"accepted\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6803938c-7259-439e-9ba2-315d8958f2c7",
+              "name": "Webhook not found (bad token, disabled automation, or no custom trigger)",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    "webhook",
+                    ":token"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) The automation's `webhook_token`. Treat this like an API key."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "c80a8cf5-7032-485b-8364-04feb2fd4f80",
+              "name": "Payload too large (over 256KB)",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    "webhook",
+                    ":token"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) The automation's `webhook_token`. Treat this like an API key."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "af58939c-a578-4fb3-8bb6-ea244d980807",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "automations",
+                    "webhook",
+                    ":token"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<string>",
+                      "key": "token",
+                      "description": "(Required) The automation's `webhook_token`. Treat this like an API key."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.tryreplicas.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "caf716ed-4fe8-4e46-85c5-5f6d689c8f90",
+    "name": "Replica Analytics Automation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.",
+      "type": "text/plain"
+    }
+  }
+}

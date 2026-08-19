@@ -1,0 +1,55 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Analytics",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Analytics Overview",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/analytics/overview",
+            "params": [
+              {
+                "name": "bucket",
+                "value": "",
+                "type": "query",
+                "description": "Time bucket granularity for the returned series. Defaults to `day`."
+              },
+              {
+                "name": "start",
+                "value": "",
+                "type": "query",
+                "description": "Inclusive start of the range as an ISO 8601 timestamp. Defaults to 30 days before `end`."
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "Exclusive end of the range as an ISO 8601 timestamp. Defaults to the current time."
+              }
+            ]
+          },
+          "docs": "Returns an aggregated overview of organization activity over a time range for organization admins: a per-bucket time series of workspaces created and pull requests opened, merged, and closed; compute-minute usage bucketed and broken down by workspace source; workspace counts grouped by source; and a summary total across the range."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

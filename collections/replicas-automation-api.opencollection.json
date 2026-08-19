@@ -1,0 +1,226 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics Automation API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Automation",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Automations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/automations",
+            "params": [
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Page number for pagination"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of items per page"
+              },
+              {
+                "name": "trigger_type",
+                "value": "",
+                "type": "query",
+                "description": "Restrict the result set to automations that have at least one trigger of the given type. Pass `all` (or omit) to disable the filter."
+              },
+              {
+                "name": "enabled",
+                "value": "",
+                "type": "query",
+                "description": "Restrict the result set to automations matching this enabled state. Omit to include both enabled and disabled automations."
+              },
+              {
+                "name": "search",
+                "value": "",
+                "type": "query",
+                "description": "Case-insensitive substring match against the automation name. Whitespace is trimmed before matching."
+              },
+              {
+                "name": "scope",
+                "value": "",
+                "type": "query",
+                "description": "Filter by automation scope. `org` returns org-owned automations, `user` returns your personal automations, `all` returns both."
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of automations for your organization."
+        },
+        {
+          "info": {
+            "name": "Create Automation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/automations",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new automation in your organization. The automation is bound to a single environment, which determines the repository (or repository set) and resolved env vars / MCPs / skills used when the automation fires."
+        },
+        {
+          "info": {
+            "name": "Get Automation",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/automations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the automation"
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific automation."
+        },
+        {
+          "info": {
+            "name": "Update Automation",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.tryreplicas.com/v1/automations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the automation"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing automation. Only the fields provided in the request body will be updated."
+        },
+        {
+          "info": {
+            "name": "Delete Automation",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/automations/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the automation"
+              }
+            ]
+          },
+          "docs": "Deletes an automation by its ID. This also deletes all associated execution history."
+        },
+        {
+          "info": {
+            "name": "Trigger Automation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/automations/:id/trigger",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the automation"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Manually triggers an automation. Automations with a cron trigger can be triggered directly; automations with a GitHub `pull_request.command` trigger can be triggered against a specific pull request by passing `pr`. This creates a new workspace and execution."
+        },
+        {
+          "info": {
+            "name": "List Automation Executions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/automations/:id/executions",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the automation"
+              },
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Page number for pagination"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of items per page"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of execution history for an automation."
+        },
+        {
+          "info": {
+            "name": "Fire a Custom Webhook Automation",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/automations/webhook/:token",
+            "params": [
+              {
+                "name": "token",
+                "value": "",
+                "type": "path",
+                "description": "The automation's `webhook_token`. Treat this like an API key."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Fires an automation that has a `custom` webhook trigger. The token in the URL is the secret: any caller that knows the URL can fire the automation, so this endpoint is unauthenticated by design (no API key). The request body is parsed as JSON and embedded into the automation's prompt under `## Trigger Payload`. Non-JSON bodies are wrapped as `{ \"raw\": \"<body>\" }`. Bodies larger than 256KB are rejected. Returns `202 Accepted` once the execution is queued; disabled automations, unknown tokens, and"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

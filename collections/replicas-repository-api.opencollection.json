@@ -1,0 +1,46 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics Repository API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Repository",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Repositories",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/repositories"
+          },
+          "docs": "Returns a list of repositories available to your organization."
+        },
+        {
+          "info": {
+            "name": "List Repository Sets",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/repository-sets"
+          },
+          "docs": "Returns a list of repository sets available to your organization."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

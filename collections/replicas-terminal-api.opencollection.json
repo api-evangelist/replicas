@@ -1,0 +1,166 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics Terminal API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Terminal",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Terminal Sessions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/terminal/sessions",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path",
+                "description": "Workspace UUID."
+              }
+            ]
+          },
+          "docs": "Lists terminal sessions for an active workspace. Older workspaces whose engine predates terminal support return 404."
+        },
+        {
+          "info": {
+            "name": "Create Terminal Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/terminal/sessions",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path",
+                "description": "Workspace UUID."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a terminal session in an active workspace, up to eight simultaneous sessions."
+        },
+        {
+          "info": {
+            "name": "Write Terminal Input",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/terminal/sessions/:sessionId/input",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Writes input to a running terminal session."
+        },
+        {
+          "info": {
+            "name": "Resize Terminal Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/terminal/sessions/:sessionId/resize",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Resizes a running terminal session."
+        },
+        {
+          "info": {
+            "name": "Delete Terminal Session",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/terminal/sessions/:sessionId",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Stops and deletes a terminal session."
+        },
+        {
+          "info": {
+            "name": "Stream Terminal Output",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/terminal/sessions/:sessionId/stream",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "sessionId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Streams terminal output and replay data as server-sent events."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,166 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics Google Search Console API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Google Search Console",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Search Console Properties",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/gdrive/search-console/sites",
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Lists Search Console properties available to the connected Google account."
+        },
+        {
+          "info": {
+            "name": "Get Search Console Property",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/gdrive/search-console/site",
+            "params": [
+              {
+                "name": "siteUrl",
+                "value": "",
+                "type": "query",
+                "description": "Search Console property identifier, such as `sc-domain:example.com` or `https://example.com/`."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns the connected account's permission level for a Search Console property."
+        },
+        {
+          "info": {
+            "name": "Query Search Performance",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/gdrive/search-console/search-analytics/query",
+            "params": [
+              {
+                "name": "siteUrl",
+                "value": "",
+                "type": "query",
+                "description": "Search Console property identifier."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Queries clicks, impressions, CTR, and average position for a Search Console property."
+        },
+        {
+          "info": {
+            "name": "List Search Console Sitemaps",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/gdrive/search-console/sitemaps",
+            "params": [
+              {
+                "name": "siteUrl",
+                "value": "",
+                "type": "query",
+                "description": "Search Console property identifier."
+              },
+              {
+                "name": "sitemapIndex",
+                "value": "",
+                "type": "query",
+                "description": "URL of a sitemap index whose child sitemaps should be returned."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Lists sitemaps submitted for a Search Console property."
+        },
+        {
+          "info": {
+            "name": "Get Search Console Sitemap",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/gdrive/search-console/sitemap",
+            "params": [
+              {
+                "name": "siteUrl",
+                "value": "",
+                "type": "query",
+                "description": "Search Console property identifier."
+              },
+              {
+                "name": "feedpath",
+                "value": "",
+                "type": "query",
+                "description": "Sitemap URL."
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns status and content counts for one submitted sitemap."
+        },
+        {
+          "info": {
+            "name": "Inspect Indexed URL",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/gdrive/search-console/url-inspection",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Returns URL Inspection data for the version currently in Google's index. This does not run a live URL test."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,68 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics Downloads API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Downloads",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Download Replicas for macOS",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/desktop/download/macos/:arch",
+            "params": [
+              {
+                "name": "arch",
+                "value": "",
+                "type": "path",
+                "description": "Mac processor architecture."
+              }
+            ]
+          },
+          "docs": "Redirects to a short-lived download URL for the latest signed and notarized macOS DMG."
+        },
+        {
+          "info": {
+            "name": "Check for a Replicas macOS update",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/desktop/update/macos/:arch/:version",
+            "params": [
+              {
+                "name": "arch",
+                "value": "",
+                "type": "path",
+                "description": "Mac processor architecture."
+              },
+              {
+                "name": "version",
+                "value": "",
+                "type": "path",
+                "description": "Installed desktop app version."
+              }
+            ]
+          },
+          "docs": "Returns the latest signed macOS update when it is newer than the installed version."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

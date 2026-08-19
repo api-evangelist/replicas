@@ -1,0 +1,603 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Analytics Replica API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Replica",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Replicas",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica",
+            "params": [
+              {
+                "name": "page",
+                "value": "",
+                "type": "query",
+                "description": "Page number for pagination"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Number of items per page"
+              },
+              {
+                "name": "user_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter replicas by the user who created them"
+              },
+              {
+                "name": "source",
+                "value": "",
+                "type": "query",
+                "description": "Filter replicas by creation source"
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter replicas by status"
+              }
+            ]
+          },
+          "docs": "Returns a paginated list of all replicas in your organization. Supports filtering by user, source, and status. For this API endpoint, results are ordered by newest `created_at` first, except `status=archived` results are ordered by most recent activity (`last_activity_at`, falling back to `created_at`)."
+        },
+        {
+          "info": {
+            "name": "Create Replica",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/replica",
+            "headers": [
+              {
+                "name": "X-Replicas-Api-Version",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new replica in your organization and sends an initial message to the coding agent. The workspace and agent are initialized asynchronously."
+        },
+        {
+          "info": {
+            "name": "Get Replica",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "include",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of additional fields to include in the response"
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific replica by its ID. Use the `include` query parameter to request additional data such as environment configuration and diffs. If the workspace is sleeping or archived, it will be woken and the response will indicate this with `waking: true`."
+        },
+        {
+          "info": {
+            "name": "Delete Replica",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/replica/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ]
+          },
+          "docs": "Deletes a replica by its ID. This terminates the underlying sandbox and processes any outstanding billing."
+        },
+        {
+          "info": {
+            "name": "Send Message",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/messages",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Sends a message to an existing replica. Supports targeting a specific chat, choosing a coding agent and model, attaching images, and enabling plan mode."
+        },
+        {
+          "info": {
+            "name": "List Chats",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ]
+          },
+          "docs": "Returns a list of chats for a replica."
+        },
+        {
+          "info": {
+            "name": "Create Chat",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chat session for a replica."
+        },
+        {
+          "info": {
+            "name": "Delete Chat",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats/:chatId",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the chat"
+              }
+            ]
+          },
+          "docs": "Deletes a chat session from a replica."
+        },
+        {
+          "info": {
+            "name": "List Slash Commands",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats/:chatId/slash-commands",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the chat"
+              }
+            ]
+          },
+          "docs": "Returns built-in Replicas slash commands and agent-provided commands for a chat, including Claude, Codex ASP, Cursor, Opencode, and Pi commands."
+        },
+        {
+          "info": {
+            "name": "Get Chat Queue",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats/:chatId/queue",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the chat"
+              }
+            ]
+          },
+          "docs": "Returns queued messages for a chat. The currently processing message is not included."
+        },
+        {
+          "info": {
+            "name": "Clear Chat Queue",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats/:chatId/queue",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the chat"
+              }
+            ]
+          },
+          "docs": "Removes all queued messages from a chat. The currently processing message is not interrupted."
+        },
+        {
+          "info": {
+            "name": "Remove Queued Message",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats/:chatId/queue/:messageId",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the chat"
+              },
+              {
+                "name": "messageId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the queued message"
+              }
+            ]
+          },
+          "docs": "Removes one queued message from a chat."
+        },
+        {
+          "info": {
+            "name": "Reorder Chat Queue",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/chats/:chatId/queue/reorder",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the chat"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Moves a queued message to a new zero-based position."
+        },
+        {
+          "info": {
+            "name": "Read History",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/history",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "chat_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter history to a specific chat"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of events to return"
+              },
+              {
+                "name": "offset",
+                "value": "",
+                "type": "query",
+                "description": "Number of events to skip from the end"
+              }
+            ]
+          },
+          "docs": "Reads the conversation history for a replica with pagination from the end (bottom-up). Optionally filter by chat ID. If the workspace is sleeping or archived, it will be woken and the response will indicate this with `waking: true`. Retry in 30-90 seconds when waking."
+        },
+        {
+          "info": {
+            "name": "Get Hook Logs",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/hooks",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ]
+          },
+          "docs": "Returns the warm hook and start hook execution logs for a replica."
+        },
+        {
+          "info": {
+            "name": "List Canvas Items",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/canvas",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ]
+          },
+          "docs": "Lists the items in the replica's Canvas (files agents drop into `~/.replicas/canvas/`). Each item has a `kind` (markdown, html, image, video, audio, or other) inferred from its extension and a `sizeBytes` measured at list time. Files larger than 5 MB are still listed; the `getReplicaCanvasItem` endpoint will return `tooLarge: true` for them so callers know to fall back to `replicas media upload`."
+        },
+        {
+          "info": {
+            "name": "Get Canvas Item",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/canvas/:filename",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              },
+              {
+                "name": "filename",
+                "value": "",
+                "type": "path",
+                "description": "The Canvas item filename, including extension (e.g. `example-plan.md`)."
+              }
+            ]
+          },
+          "docs": "Reads a single Canvas item by filename. Text kinds (`markdown`, `html`) return UTF-8 text in `content`. Binary kinds (`image`, `video`, `audio`, `other`) return base64 in `base64`. Items over the 5 MB per-file cap return `tooLarge: true` with neither payload; callers should reach for `replicas media upload` for those."
+        },
+        {
+          "info": {
+            "name": "Stream Events",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/replica/:id/events",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "The unique identifier of the replica"
+              }
+            ]
+          },
+          "docs": "Opens a Server-Sent Events (SSE) stream for real-time events from a replica. The connection remains open and events are pushed as they occur.\n\nEach event is delivered as an SSE message in the format `data: <JSON>\\n\\n`. A heartbeat ping is sent every 15 seconds to keep the connection alive. Clients should reconnect automatically on disconnect.\n\nAll events share a common envelope structure with `id` (unique event ID), `ts` (ISO 8601 timestamp), `type` (event type discriminator), and `payload` (typ"
+        },
+        {
+          "info": {
+            "name": "List Workspace Chats",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/chats",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Lists active, sleeping, and pending chats. Chats created while the workspace is preparing remain visible while startup completes."
+        },
+        {
+          "info": {
+            "name": "Create Workspace Chat",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/chats",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a chat immediately. For preparing or sleeping workspaces, the chat stays visible and is created in the engine after startup completes. Archived and error workspaces return 409."
+        },
+        {
+          "info": {
+            "name": "Send Workspace Chat Message",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/chats/:chatId/messages",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              },
+              {
+                "name": "chatId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Accepts a message immediately. Messages sent while a workspace is preparing or sleeping are queued server-side and delivered in order after startup completes. Archived and error workspaces return 409."
+        },
+        {
+          "info": {
+            "name": "Send Deferred Workspace Message",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/messages/deferred",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates or selects a chat, queues a message, and wakes a preparing or sleeping workspace. The queued message remains available while startup completes. Archived and error workspaces return 409."
+        },
+        {
+          "info": {
+            "name": "Archive Workspace",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/archive",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path",
+                "description": "Workspace UUID."
+              }
+            ]
+          },
+          "docs": "Archives a workspace in the authenticated organization. Archived workspaces stay paused and can be woken later."
+        },
+        {
+          "info": {
+            "name": "Sleep Workspace",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/workspaces/:workspaceId/sleep",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path",
+                "description": "Workspace UUID."
+              }
+            ]
+          },
+          "docs": "Forces an active workspace in the authenticated organization to sleep, stopping compute charges. Slept workspaces can be woken later. A no-op for already-sleeping or archived workspaces; returns 409 for preparing or error workspaces."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

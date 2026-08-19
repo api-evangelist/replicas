@@ -1,0 +1,816 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Replica Analytics Environments API",
+    "version": "2.0.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Environments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List Environments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments",
+            "params": [
+              {
+                "name": "scope",
+                "value": "",
+                "type": "query",
+                "description": "Filter by environment scope. `org` returns team environments, `user` returns your personal environments, `all` returns both. Defaults to `org`."
+              }
+            ]
+          },
+          "docs": "Returns environments visible to the caller, including the singleton Global environment for org scope. Each record includes counts of attached variables, files, skills, and MCPs."
+        },
+        {
+          "info": {
+            "name": "Create Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new team or personal environment. `repository_id` and `repository_set_id` are mutually exclusive; both may be omitted for an unbound environment that can back repo-less workspaces. Personal environments are visible only to the authenticated user. When `scope=user` and `source_environment_id` references a team environment, the personal environment inherits from that source instead of copying it."
+        },
+        {
+          "info": {
+            "name": "Get Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global` for the org's Global environment."
+              }
+            ]
+          },
+          "docs": "Returns a single environment. Pass the literal string `global` for the org's singleton Global environment (auto-created on first access — no need to look up its UUID first)."
+        },
+        {
+          "info": {
+            "name": "Update Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.tryreplicas.com/v1/environments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID. The literal `global` is rejected with 400 — see endpoint description."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a non-global environment. Only provided fields are changed. `PATCH /v1/environments/global` returns 400 with a pointer to the nested resource endpoints (variables, files, skills, MCPs, warm hooks) — the Global env's metadata cannot be edited directly. Source-backed personal environments cannot change `repository_id`, `repository_set_id`, or `system_prompt`, but may set `personal_preferences`, instructions appended after the inherited system prompt. Returns 409 when an automation still re"
+        },
+        {
+          "info": {
+            "name": "Delete Environment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/environments/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID. The literal `global` is rejected with 409 — the Global env cannot be deleted."
+              }
+            ]
+          },
+          "docs": "Deletes an environment. Returns 409 when an automation still references the environment, when personal environments inherit from it, or when called against the Global environment (which cannot be deleted)."
+        },
+        {
+          "info": {
+            "name": "List Environment Variables",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/variables",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global` for the org's Global environment."
+              }
+            ]
+          },
+          "docs": "Returns every variable attached to the environment. Values are returned in plaintext (they are encrypted at rest, decrypted on read)."
+        },
+        {
+          "info": {
+            "name": "Create Environment Variable",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/variables",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global` for the org's Global environment."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds a new variable to the environment. Values are encrypted at rest. The `(environment, key)` pair must be unique within the org. Source-backed personal environments can override inherited variable keys only when the inherited variable has `personal_override_allowed: true`."
+        },
+        {
+          "info": {
+            "name": "Update Environment Variable",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/variables/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Variable UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates a variable. Only provided fields are changed. Source-backed personal environments can override inherited variable keys only when the inherited variable has `personal_override_allowed: true`."
+        },
+        {
+          "info": {
+            "name": "Delete Environment Variable",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/variables/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Variable UUID"
+              }
+            ]
+          },
+          "docs": "Delete Environment Variable"
+        },
+        {
+          "info": {
+            "name": "List Environment Files",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/files",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns every file attached to the environment. Files are dropped into the workspace at the configured `path` when the workspace is provisioned."
+        },
+        {
+          "info": {
+            "name": "Create Environment File",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/files",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds a new file to the environment. Maximum content size is 64 KB (65,536 bytes). The `path` is validated against allowed locations (typically under `~/`)."
+        },
+        {
+          "info": {
+            "name": "Update Environment File",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/files/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "File UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update Environment File"
+        },
+        {
+          "info": {
+            "name": "Delete Environment File",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/files/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "File UUID"
+              }
+            ]
+          },
+          "docs": "Delete Environment File"
+        },
+        {
+          "info": {
+            "name": "List Environment Skills",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/skills",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns every skill enabled on the environment. Skills come from [skills.sh](https://skills.sh) and are installed into workspaces created from the environment."
+        },
+        {
+          "info": {
+            "name": "Enable Environment Skill",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/skills",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables a skill on the environment. Use [GET /v1/environment-skills/search](#tag/Environments/operation/searchEnvironmentSkills) to discover skills first, then enable them with this endpoint. Returns 409 if the skill (by `slug` or `source`) is already enabled on the environment."
+        },
+        {
+          "info": {
+            "name": "Disable Environment Skill",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/skills/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Environment skill UUID (the membership row, not the skill catalog slug)."
+              }
+            ]
+          },
+          "docs": "Disables a previously enabled skill on the environment."
+        },
+        {
+          "info": {
+            "name": "List Skill Registries",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/skills-registries",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns every skill registry configured on the environment, along with the discovered skills from each registry repository."
+        },
+        {
+          "info": {
+            "name": "Add Skill Registry",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/skills-registries",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds a GitHub repository as a skill registry on the environment. Skills discovered in the repository are installed into workspaces at provisioning time."
+        },
+        {
+          "info": {
+            "name": "Remove Skill Registry",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/skills-registries/:skillsRegistryId",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "skillsRegistryId",
+                "value": "",
+                "type": "path",
+                "description": "Skills registry UUID."
+              }
+            ]
+          },
+          "docs": "Removes a skill registry from the environment."
+        },
+        {
+          "info": {
+            "name": "List Skills From Bound Repo",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/repo-skills",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns skills, agents, commands, prompts, and rule files committed to the repository (or repository set) the environment is bound to. Resolved live from the repo's default branch via GitHub. Read-only: these are sourced from the user's git tree, not from `skills.sh`. When the environment is not bound to a repo, returns an empty list with no error."
+        },
+        {
+          "info": {
+            "name": "List Environment MCPs",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/mcps",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns every MCP (Model Context Protocol server) attached to the environment."
+        },
+        {
+          "info": {
+            "name": "Create Environment MCP",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/mcps",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Adds a new MCP server to the environment. `name` must match `^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$` and cannot start with reserved prefix `replicas-`. The `config` shape depends on the `transport`: stdio uses `{ command, args, env }`; http and sse use `{ url, headers }`."
+        },
+        {
+          "info": {
+            "name": "Update Environment MCP",
+            "type": "http"
+          },
+          "http": {
+            "method": "PATCH",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/mcps/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "MCP UUID"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an MCP. Only provided fields are changed. When changing `transport`, `config` is required and must match the new transport's shape."
+        },
+        {
+          "info": {
+            "name": "Delete Environment MCP",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/mcps/:id",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              },
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "MCP UUID"
+              }
+            ]
+          },
+          "docs": "Delete Environment MCP"
+        },
+        {
+          "info": {
+            "name": "Get Warm Hooks State",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/warm-hooks",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns the active warm hook (if any) and warm pool config (if any) for the environment, along with current pool counts."
+        },
+        {
+          "info": {
+            "name": "Save Warm Hook",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/warm-hooks/save",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Persists and activates the supplied script as the warm hook for the environment without running a test. Use this when you want to save quickly without waiting for a sandbox to spin up."
+        },
+        {
+          "info": {
+            "name": "Save and Test Warm Hook",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/warm-hooks/save-test",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Saves the supplied script as the active warm hook for the environment and runs it in an isolated sandbox. Always persists the new version; the response includes the test result so callers can decide whether to roll back. The endpoint takes 30–90 seconds to return because it spins up a real sandbox."
+        },
+        {
+          "info": {
+            "name": "Test Warm Hook",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/warm-hooks/test",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Runs the supplied script in an isolated sandbox without persisting it. Useful for iterating on a warm hook from the API before committing it via `save-test`. Takes 30–90 seconds to return."
+        },
+        {
+          "info": {
+            "name": "Get Start Hook",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/start-hooks",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ]
+          },
+          "docs": "Returns the active start hook (if any) for the environment. Start hooks run at workspace boot, after the warm sandbox is claimed; the env-level hook runs before any repository-level start hooks defined in `replicas.json` / `replicas.yaml`."
+        },
+        {
+          "info": {
+            "name": "Save Start Hook",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/start-hooks/save",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Persists and activates the supplied script as the start hook for the environment. Empty content clears the active start hook. Editing a start hook does not invalidate the warm pool — the new content is picked up automatically on the next claim, since start hooks run at workspace boot rather than during warming."
+        },
+        {
+          "info": {
+            "name": "Test Start Hook",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/start-hooks/test",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Runs the supplied start hook script in an isolated sandbox without persisting it, and returns the full result once the hook finishes. Useful for short-lived clients (CLI, scripts) that prefer a single response over an SSE stream. Takes 30–90 seconds to return."
+        },
+        {
+          "info": {
+            "name": "Test Start Hook (Streaming)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/start-hooks/test/stream",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Provisions an isolated sandbox, runs the supplied start hook script, and streams output back as Server-Sent Events. Use this instead of a synchronous test endpoint to avoid gateway timeouts on long-running hooks. Events emitted: `progress` (status messages), `output` (captured stdout/stderr), `complete` (final `exit_code` and `timed_out`), and `error` (terminal failure)."
+        },
+        {
+          "info": {
+            "name": "Enable or Disable Warm Pool",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://api.tryreplicas.com/v1/environments/:environmentId/warm-pools",
+            "params": [
+              {
+                "name": "environmentId",
+                "value": "",
+                "type": "path",
+                "description": "Environment UUID, or the literal string `global`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Enables or disables the warm pool for the environment. The target pool size is fixed by the platform; only `enabled` is configurable from the API."
+        },
+        {
+          "info": {
+            "name": "List Warm Pool Workspaces",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/warm-pools/:configId/workspaces",
+            "params": [
+              {
+                "name": "configId",
+                "value": "",
+                "type": "path",
+                "description": "Warm pool config UUID (from the `warm_pool.id` returned by GET `/v1/environments/{environmentId}/warm-hooks` or PUT `/v1/environments/{environmentId}/warm-pools`)."
+              }
+            ]
+          },
+          "docs": "Returns the most recent pre-warmed workspaces for a warm pool config, including their status (warming, snapshotting, ready, assigned, expired, failed). Useful for inspecting why a pool is not delivering ready workspaces. Returns up to 10 entries. To watch warm-hook output live during the `warming` phase, subscribe to [GET /v1/warm-pool-workspaces/{workspaceId}/stream](#tag/Environments/operation/streamWarmPoolWorkspace)."
+        },
+        {
+          "info": {
+            "name": "Stream Warm Pool Workspace Updates",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/warm-pool-workspaces/:workspaceId/stream",
+            "params": [
+              {
+                "name": "workspaceId",
+                "value": "",
+                "type": "path",
+                "description": "Warm pool workspace UUID (from the `id` field returned by [GET /v1/warm-pools/{configId}/workspaces](#tag/Environments/operation/listWarmPoolWorkspaces))."
+              }
+            ]
+          },
+          "docs": "Server-Sent Events stream that delivers live warm-hook stdout/stderr plus status transitions for a single warm pool workspace. The monolith proxies output from the warming sandbox's engine; output is only available while the sandbox is running (i.e. `status` is `warming`). Once the workspace reaches `snapshotting` the sandbox is suspended and the stream stops emitting `output` events — only status transitions and the terminal `complete` event still flow. The stream auto-closes on terminal status"
+        },
+        {
+          "info": {
+            "name": "Search Skill Catalog",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://api.tryreplicas.com/v1/environment-skills/search",
+            "params": [
+              {
+                "name": "q",
+                "value": "",
+                "type": "query",
+                "description": "Free-text query (matched against skill name and description). Empty query returns popular skills."
+              }
+            ]
+          },
+          "docs": "Searches the [skills.sh](https://skills.sh) catalog for skills that can be enabled on an environment via [POST /v1/environments/{environmentId}/skills](#tag/Environments/operation/createEnvironmentSkill)."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

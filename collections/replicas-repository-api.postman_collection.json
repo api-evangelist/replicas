@@ -1,0 +1,385 @@
+{
+  "item": [
+    {
+      "id": "19777d93-a313-4afa-979d-739b7cb22bff",
+      "name": "Repository",
+      "description": {
+        "content": "Read repositories and repository sets connected to your organization. Repositories are the underlying GitHub-connection layer; bind them to an environment to use them in workspaces.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "6091b082-83ca-436d-b35b-6f855f29c255",
+          "name": "List Repositories",
+          "request": {
+            "name": "List Repositories",
+            "description": {
+              "content": "Returns a list of repositories available to your organization.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "replica",
+                "repositories"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "37a11a08-85a7-4834-ae54-32c94bb78cc5",
+              "name": "Successful response",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "replica",
+                    "repositories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"repositories\": [\n    {\n      \"id\": \"c416364a-f5b7-5d0f-c7cd-a0ee1b804bb9\",\n      \"name\": \"string\",\n      \"url\": \"https://FBUAko.seGv502dA,NrLYjgJQ-HFiEH\",\n      \"default_branch\": \"string\"\n    },\n    {\n      \"id\": \"b710b3d1-bd6d-1148-906c-60e61fa37344\",\n      \"name\": \"string\",\n      \"url\": \"https://OF.mhmEe3ozk51aEf7\",\n      \"default_branch\": \"string\"\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "27bb3abb-9fcd-4f64-ad52-9cddf9b01c8e",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "replica",
+                    "repositories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4cba6fce-0333-41dc-b62a-038140623ad0",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "replica",
+                    "repositories"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "d19ea749-a881-4265-b529-79aeb3c8b95d",
+          "name": "List Repository Sets",
+          "request": {
+            "name": "List Repository Sets",
+            "description": {
+              "content": "Returns a list of repository sets available to your organization.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "v1",
+                "replica",
+                "repository-sets"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "043f8417-8087-40f7-82c2-d6d2a3151ac4",
+              "name": "Successful response",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "replica",
+                    "repository-sets"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"repository_sets\": [\n    {\n      \"id\": \"e2f482de-830d-12c2-5915-8b8746b2f6d9\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"repositories\": [\n        {\n          \"id\": \"7e920d6e-cce9-d3cc-664d-84d256ffae22\",\n          \"name\": \"string\",\n          \"url\": \"https://sYWJKWyfVcUWbQxDkhsPDXYrQsKwl.gvwofunnjwl0LmcJNTZXU8XtAvP6BhmRlY3HLCGIC4dtuRUcem.V-+Gy2u\",\n          \"default_branch\": \"string\"\n        },\n        {\n          \"id\": \"ac34a72d-9f3d-d297-8d22-ca6834c6992b\",\n          \"name\": \"string\",\n          \"url\": \"https://psNNJLaPiazLRyhjNBDuypYjkC.mezQc.b,yR2OBwOxFT,bCGG8QwoSOtnj5s4n-g1awQoTf8Lw6naA\",\n          \"default_branch\": \"string\"\n        }\n      ]\n    },\n    {\n      \"id\": \"18022e94-e1fd-cb93-aaa2-9438331ef580\",\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"repositories\": [\n        {\n          \"id\": \"e8e37be9-1b62-8b2c-baa8-897835420ddf\",\n          \"name\": \"string\",\n          \"url\": \"http://VEIYCmbTMRQYkrsKdKLWWmwyHWL.zgEic,rbH4hNQAIuPWgxk3\",\n          \"default_branch\": \"string\"\n        },\n        {\n          \"id\": \"a62a0e38-3189-f749-8f3e-7fe941dca257\",\n          \"name\": \"string\",\n          \"url\": \"https://gXpTPdlBLpN.mnRlCS1KnMNlWdHDrGZj4,xB5U0gtYHTolK3G,dEfXd\",\n          \"default_branch\": \"string\"\n        }\n      ]\n    }\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "96b83cac-de87-48df-9ff9-376b6f3a005f",
+              "name": "Unauthorized - Invalid or missing API key",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "replica",
+                    "repository-sets"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7232d077-f361-4c65-aa5b-2b1797c8d75d",
+              "name": "Internal server error",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "v1",
+                    "replica",
+                    "repository-sets"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"string\",\n  \"details\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.tryreplicas.com",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "d4165ff1-32fe-4e8f-8c1a-f2a9a74b9efc",
+    "name": "Replica Analytics Repository API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.",
+      "type": "text/plain"
+    }
+  }
+}
