@@ -1,23 +1,11 @@
 {
   "provider": "replicas",
   "sources": [
-    "replicas-analytics-api-openapi.yml",
-    "replicas-api-keys-api-openapi.yml",
-    "replicas-automation-api-openapi.yml",
-    "replicas-credentials-api-openapi.yml",
-    "replicas-downloads-api-openapi.yml",
-    "replicas-environments-api-openapi.yml",
-    "replicas-google-search-console-api-openapi.yml",
-    "replicas-preview-api-openapi.yml",
-    "replicas-profile-api-openapi.yml",
-    "replicas-replica-api-openapi.yml",
-    "replicas-repository-api-openapi.yml",
-    "replicas-slack-api-openapi.yml",
-    "replicas-terminal-api-openapi.yml"
+    "_original/replicas-openapi-original.json"
   ],
   "outputs": [
-    "replicas-analytics-api-openapi.yml",
     "replicas-api-keys-api-openapi.yml",
+    "replicas-analytics-api-openapi.yml",
     "replicas-automation-api-openapi.yml",
     "replicas-credentials-api-openapi.yml",
     "replicas-downloads-api-openapi.yml",
@@ -33,6 +21,25 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "replicas-openapi-original.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "replicas-openapi-original.json: declared missing tag: API Keys",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "replicas-analytics-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-api-keys-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-automation-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-credentials-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-downloads-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-environments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-google-search-console-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-preview-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-profile-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-replica-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-repository-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-slack-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "replicas-terminal-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

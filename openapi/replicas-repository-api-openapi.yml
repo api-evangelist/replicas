@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Replica Analytics Repository API
+  title: Replica Repository API
   version: 2.0.0
   description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
 servers:
@@ -64,19 +64,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
-      required:
-      - error
     RepositorySet:
       type: object
       description: A named set of repositories
@@ -126,15 +113,28 @@ components:
       - name
       - url
       - default_branch
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
   responses:
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
+    InternalServerError:
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    InternalServerError:
-      description: Internal server error
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:

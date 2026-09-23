@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Replica Analytics Terminal API
+  title: Replica Terminal API
   version: 2.0.0
   description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
 servers:
@@ -231,7 +231,65 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    TerminalSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        exited:
+          type: boolean
+        exitCode:
+          type: integer
+      required:
+      - id
+      - title
+      - createdAt
+      - exited
     ResizeTerminalSessionRequest:
+      type: object
+      properties:
+        cols:
+          type: integer
+          minimum: 2
+          maximum: 500
+        rows:
+          type: integer
+          minimum: 1
+          maximum: 200
+      required:
+      - cols
+      - rows
+    ListTerminalSessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TerminalSession'
+      required:
+      - sessions
+    TerminalMutationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+      required:
+      - success
+    CreateTerminalSessionResponse:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/TerminalSession'
+      required:
+      - session
+    CreateTerminalSessionRequest:
       type: object
       properties:
         cols:
@@ -263,21 +321,6 @@ components:
       - data
       - generation
       - sequence
-    TerminalMutationResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          const: true
-      required:
-      - success
-    CreateTerminalSessionResponse:
-      type: object
-      properties:
-        session:
-          $ref: '#/components/schemas/TerminalSession'
-      required:
-      - session
     Error:
       type: object
       properties:
@@ -291,62 +334,7 @@ components:
           description: Additional error details
       required:
       - error
-    TerminalSession:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        title:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        exited:
-          type: boolean
-        exitCode:
-          type: integer
-      required:
-      - id
-      - title
-      - createdAt
-      - exited
-    CreateTerminalSessionRequest:
-      type: object
-      properties:
-        cols:
-          type: integer
-          minimum: 2
-          maximum: 500
-        rows:
-          type: integer
-          minimum: 1
-          maximum: 200
-      required:
-      - cols
-      - rows
-    ListTerminalSessionsResponse:
-      type: object
-      properties:
-        sessions:
-          type: array
-          items:
-            $ref: '#/components/schemas/TerminalSession'
-      required:
-      - sessions
   responses:
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     BadRequest:
       description: Bad request - Missing or invalid parameters
       content:
@@ -355,6 +343,18 @@ components:
             $ref: '#/components/schemas/Error'
     InternalServerError:
       description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:

@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Replica Analytics Downloads API
+  title: Replica Downloads API
   version: 2.0.0
   description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
 servers:
@@ -109,6 +109,19 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
+  responses:
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   schemas:
     Error:
       type: object
@@ -123,19 +136,6 @@ components:
           description: Additional error details
       required:
       - error
-  responses:
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    InternalServerError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   securitySchemes:
     apiKey:
       type: http

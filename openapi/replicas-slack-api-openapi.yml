@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Replica Analytics Slack API
+  title: Replica Slack API
   version: 2.0.0
   description: The Replica API allows you to programmatically manage cloud workspaces for AI agents. Use this API to manage environments (the org-scoped primitive workspaces are created from — including variables, files, skills, MCPs, warm hooks, start hooks, and warm pools), create and manage replicas, send messages, manage chats, stream events, read connected repositories and repository sets, and configure automations.
 servers:
@@ -54,22 +54,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    SlackThreadAttachRequest:
-      type: object
-      properties:
-        channel_id:
-          type: string
-          description: Slack channel ID containing the thread.
-        thread_ts:
-          type: string
-          description: Slack thread timestamp.
-        workspace_id:
-          type: string
-          format: uuid
-          description: Target workspace ID. Required outside agent mode.
-      required:
-      - channel_id
-      - thread_ts
     SlackThreadAttachResponse:
       type: object
       properties:
@@ -89,19 +73,6 @@ components:
       required:
       - thread
       - workspace
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
-      required:
-      - error
     SlackThreadRecord:
       type: object
       properties:
@@ -199,21 +170,38 @@ components:
       - thread_ts
       - original_message
       - user_id
+    SlackThreadAttachRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: Slack channel ID containing the thread.
+        thread_ts:
+          type: string
+          description: Slack thread timestamp.
+        workspace_id:
+          type: string
+          format: uuid
+          description: Target workspace ID. Required outside agent mode.
+      required:
+      - channel_id
+      - thread_ts
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
   responses:
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     Conflict:
       description: Conflict - Resource already exists or operation conflicts with current state
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
@@ -226,6 +214,18 @@ components:
             $ref: '#/components/schemas/Error'
     InternalServerError:
       description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
