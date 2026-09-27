@@ -77,32 +77,20 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
-  responses:
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    InternalServerError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
   schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
     GetUserProfileResponse:
       type: object
       properties:
@@ -125,19 +113,6 @@ components:
       required:
       - displayName
       - avatarUrl
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
-      required:
-      - error
     UserProfile:
       type: object
       properties:
@@ -161,6 +136,31 @@ components:
       - email
       - displayName
       - avatarUrl
+  responses:
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
   securitySchemes:
     apiKey:
       type: http

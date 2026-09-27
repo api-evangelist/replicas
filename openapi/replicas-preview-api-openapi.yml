@@ -86,18 +86,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    DeletePreviewResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          description: Whether the preview was deleted
-        port:
-          type: integer
-          description: Port number that was unregistered
-      required:
-      - success
-      - port
     Error:
       type: object
       properties:
@@ -111,27 +99,39 @@ components:
           description: Additional error details
       required:
       - error
+    DeletePreviewResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the preview was deleted
+        port:
+          type: integer
+          description: Port number that was unregistered
+      required:
+      - success
+      - port
   responses:
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    NotFound:
-      description: Resource not found
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:

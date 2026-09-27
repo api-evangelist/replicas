@@ -231,6 +231,51 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    WriteTerminalSessionRequest:
+      type: object
+      properties:
+        data:
+          type: string
+          maxLength: 65536
+        generation:
+          type: integer
+          minimum: 0
+          description: Client generation used to reset input ordering.
+        sequence:
+          type: integer
+          minimum: 0
+          description: Zero-based batch sequence within the generation.
+      required:
+      - data
+      - generation
+      - sequence
+    CreateTerminalSessionRequest:
+      type: object
+      properties:
+        cols:
+          type: integer
+          minimum: 2
+          maximum: 500
+        rows:
+          type: integer
+          minimum: 1
+          maximum: 200
+      required:
+      - cols
+      - rows
     TerminalSession:
       type: object
       properties:
@@ -251,6 +296,13 @@ components:
       - title
       - createdAt
       - exited
+    CreateTerminalSessionResponse:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/TerminalSession'
+      required:
+      - session
     ResizeTerminalSessionRequest:
       type: object
       properties:
@@ -282,79 +334,27 @@ components:
           const: true
       required:
       - success
-    CreateTerminalSessionResponse:
-      type: object
-      properties:
-        session:
-          $ref: '#/components/schemas/TerminalSession'
-      required:
-      - session
-    CreateTerminalSessionRequest:
-      type: object
-      properties:
-        cols:
-          type: integer
-          minimum: 2
-          maximum: 500
-        rows:
-          type: integer
-          minimum: 1
-          maximum: 200
-      required:
-      - cols
-      - rows
-    WriteTerminalSessionRequest:
-      type: object
-      properties:
-        data:
-          type: string
-          maxLength: 65536
-        generation:
-          type: integer
-          minimum: 0
-          description: Client generation used to reset input ordering.
-        sequence:
-          type: integer
-          minimum: 0
-          description: Zero-based batch sequence within the generation.
-      required:
-      - data
-      - generation
-      - sequence
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
-      required:
-      - error
   responses:
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    NotFound:
-      description: Resource not found
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:

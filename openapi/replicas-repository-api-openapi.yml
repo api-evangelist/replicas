@@ -64,6 +64,19 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
     RepositorySet:
       type: object
       description: A named set of repositories
@@ -113,19 +126,6 @@ components:
       - name
       - url
       - default_branch
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
-      required:
-      - error
   responses:
     InternalServerError:
       description: Internal server error
