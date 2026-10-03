@@ -124,14 +124,14 @@ components:
       required:
       - error
   responses:
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
+    InternalServerError:
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    InternalServerError:
-      description: Internal server error
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
       content:
         application/json:
           schema:

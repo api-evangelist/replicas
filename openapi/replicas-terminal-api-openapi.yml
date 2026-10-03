@@ -231,19 +231,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
-      required:
-      - error
     WriteTerminalSessionRequest:
       type: object
       properties:
@@ -262,7 +249,7 @@ components:
       - data
       - generation
       - sequence
-    CreateTerminalSessionRequest:
+    ResizeTerminalSessionRequest:
       type: object
       properties:
         cols:
@@ -276,6 +263,27 @@ components:
       required:
       - cols
       - rows
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
+      required:
+      - error
+    TerminalMutationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+      required:
+      - success
     TerminalSession:
       type: object
       properties:
@@ -303,7 +311,7 @@ components:
           $ref: '#/components/schemas/TerminalSession'
       required:
       - session
-    ResizeTerminalSessionRequest:
+    CreateTerminalSessionRequest:
       type: object
       properties:
         cols:
@@ -326,35 +334,27 @@ components:
             $ref: '#/components/schemas/TerminalSession'
       required:
       - sessions
-    TerminalMutationResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          const: true
-      required:
-      - success
   responses:
-    InternalServerError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     Unauthorized:
       description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
+    InternalServerError:
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     NotFound:
       description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
       content:
         application/json:
           schema:

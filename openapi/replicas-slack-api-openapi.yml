@@ -60,8 +60,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    NotFound:
-      description: Resource not found
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
@@ -72,8 +72,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
@@ -98,6 +98,22 @@ components:
           description: Additional error details
       required:
       - error
+    SlackThreadAttachRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          description: Slack channel ID containing the thread.
+        thread_ts:
+          type: string
+          description: Slack thread timestamp.
+        workspace_id:
+          type: string
+          format: uuid
+          description: Target workspace ID. Required outside agent mode.
+      required:
+      - channel_id
+      - thread_ts
     SlackThreadRecord:
       type: object
       properties:
@@ -144,22 +160,25 @@ components:
       - last_processed_message_ts
       - created_at
       - updated_at
-    SlackThreadAttachRequest:
+    SlackThreadAttachResponse:
       type: object
       properties:
-        channel_id:
-          type: string
-          description: Slack channel ID containing the thread.
-        thread_ts:
-          type: string
-          description: Slack thread timestamp.
-        workspace_id:
-          type: string
-          format: uuid
-          description: Target workspace ID. Required outside agent mode.
+        thread:
+          $ref: '#/components/schemas/SlackThreadRecord'
+        workspace:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+          required:
+          - id
+          - name
       required:
-      - channel_id
-      - thread_ts
+      - thread
+      - workspace
     SlackThreadMetadata:
       type: object
       properties:
@@ -211,25 +230,6 @@ components:
       - thread_ts
       - original_message
       - user_id
-    SlackThreadAttachResponse:
-      type: object
-      properties:
-        thread:
-          $ref: '#/components/schemas/SlackThreadRecord'
-        workspace:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            name:
-              type: string
-          required:
-          - id
-          - name
-      required:
-      - thread
-      - workspace
   securitySchemes:
     apiKey:
       type: http

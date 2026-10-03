@@ -62,6 +62,27 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    AnalyticsTimeSeriesPoint:
+      type: object
+      description: Activity counts for a single time bucket
+      properties:
+        bucket:
+          type: string
+          description: Bucket start as an ISO 8601 date (e.g. 2026-07-14)
+        workspacesCreated:
+          type: integer
+        prsOpened:
+          type: integer
+        prsMerged:
+          type: integer
+        prsClosed:
+          type: integer
+      required:
+      - bucket
+      - workspacesCreated
+      - prsOpened
+      - prsMerged
+      - prsClosed
     AnalyticsUsagePoint:
       type: object
       description: Compute minutes for a single time bucket, broken down by workspace source
@@ -111,27 +132,6 @@ components:
       - prsMerged
       - prsClosed
       - computeMinutes
-    AnalyticsTimeSeriesPoint:
-      type: object
-      description: Activity counts for a single time bucket
-      properties:
-        bucket:
-          type: string
-          description: Bucket start as an ISO 8601 date (e.g. 2026-07-14)
-        workspacesCreated:
-          type: integer
-        prsOpened:
-          type: integer
-        prsMerged:
-          type: integer
-        prsClosed:
-          type: integer
-      required:
-      - bucket
-      - workspacesCreated
-      - prsOpened
-      - prsMerged
-      - prsClosed
     AnalyticsOverview:
       type: object
       description: Aggregated activity and usage metrics for an organization over a time range
@@ -192,14 +192,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    InternalServerError:
-      description: Internal server error
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
+    InternalServerError:
+      description: Internal server error
       content:
         application/json:
           schema:
