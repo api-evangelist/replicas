@@ -220,6 +220,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/replicas-capability-edges.yml
+  name: Replicas Business Capability Map
 - type: Overlay
   url: overlays/replicas-openapi-overlay.yaml
 - type: DeveloperPortal
