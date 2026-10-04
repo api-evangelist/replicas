@@ -62,27 +62,6 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
-    AnalyticsTimeSeriesPoint:
-      type: object
-      description: Activity counts for a single time bucket
-      properties:
-        bucket:
-          type: string
-          description: Bucket start as an ISO 8601 date (e.g. 2026-07-14)
-        workspacesCreated:
-          type: integer
-        prsOpened:
-          type: integer
-        prsMerged:
-          type: integer
-        prsClosed:
-          type: integer
-      required:
-      - bucket
-      - workspacesCreated
-      - prsOpened
-      - prsMerged
-      - prsClosed
     AnalyticsUsagePoint:
       type: object
       description: Compute minutes for a single time bucket, broken down by workspace source
@@ -98,19 +77,18 @@ components:
       required:
       - bucket
       - bySource
-    Error:
+    AnalyticsSourceCount:
       type: object
+      description: Count of workspaces created from a given source
       properties:
-        error:
+        source:
           type: string
-          description: Error message
-        details:
-          type:
-          - string
-          - 'null'
-          description: Additional error details
+          description: Workspace source (e.g. dashboard, api, automation, slack, linear, github, gitlab)
+        count:
+          type: integer
       required:
-      - error
+      - source
+      - count
     AnalyticsSummary:
       type: object
       description: Totals across the requested range
@@ -132,6 +110,27 @@ components:
       - prsMerged
       - prsClosed
       - computeMinutes
+    AnalyticsTimeSeriesPoint:
+      type: object
+      description: Activity counts for a single time bucket
+      properties:
+        bucket:
+          type: string
+          description: Bucket start as an ISO 8601 date (e.g. 2026-07-14)
+        workspacesCreated:
+          type: integer
+        prsOpened:
+          type: integer
+        prsMerged:
+          type: integer
+        prsClosed:
+          type: integer
+      required:
+      - bucket
+      - workspacesCreated
+      - prsOpened
+      - prsMerged
+      - prsClosed
     AnalyticsOverview:
       type: object
       description: Aggregated activity and usage metrics for an organization over a time range
@@ -173,27 +172,28 @@ components:
       - summary
       - sources
       - usage
-    AnalyticsSourceCount:
+    Error:
       type: object
-      description: Count of workspaces created from a given source
       properties:
-        source:
+        error:
           type: string
-          description: Workspace source (e.g. dashboard, api, automation, slack, linear, github, gitlab)
-        count:
-          type: integer
+          description: Error message
+        details:
+          type:
+          - string
+          - 'null'
+          description: Additional error details
       required:
-      - source
-      - count
+      - error
   responses:
-    Forbidden:
-      description: Forbidden - The authenticated account cannot access this resource
+    BadRequest:
+      description: Bad request - Missing or invalid parameters
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
+    Forbidden:
+      description: Forbidden - The authenticated account cannot access this resource
       content:
         application/json:
           schema:
@@ -204,8 +204,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    BadRequest:
-      description: Bad request - Missing or invalid parameters
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:

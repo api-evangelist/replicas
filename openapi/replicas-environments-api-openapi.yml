@@ -1190,6 +1190,229 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    GetStartHooksResponse:
+      type: object
+      properties:
+        start_hook:
+          oneOf:
+          - $ref: '#/components/schemas/StartHookRecord'
+          - type: 'null'
+          description: The active start hook for the environment (null if none has ever been saved).
+      required:
+      - start_hook
+    UpdateEnvironmentRequest:
+      type: object
+      description: Request body for updating an environment. Only provided fields are changed. `repository_id` and `repository_set_id` remain mutually exclusive when both are supplied.
+      properties:
+        name:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+        repository_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        repository_set_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        system_prompt:
+          type:
+          - string
+          - 'null'
+        mobile_testing_enabled:
+          type: boolean
+          description: Enable or disable mobile testing. Only valid on team environments; enabling requires a Team or Enterprise plan and otherwise returns `PLAN_UPGRADE_REQUIRED`.
+        personal_preferences:
+          type:
+          - string
+          - 'null'
+          description: Only settable on personal environments. Appended after the (inherited) system prompt.
+    StartHookRecord:
+      type: object
+      description: A start hook — the shell script that runs at workspace boot (after the warm sandbox is claimed) for an environment.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          description: Monotonic version (newer scripts have higher versions)
+        content:
+          type: string
+          description: Shell script content
+        is_active:
+          type: boolean
+          description: Whether this version is the active one for the environment
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - version
+      - content
+      - is_active
+      - created_at
+    SearchEnvironmentSkillsResponse:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchSkill'
+      required:
+      - skills
+    ListEnvironmentSkillsRegistriesResponse:
+      type: object
+      properties:
+        registries:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentSkillsRegistryWithContents'
+      required:
+      - registries
+    WarmHookRecord:
+      type: object
+      description: A warm hook — the shell script that runs while pre-warming workspaces for an environment.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          description: Monotonic version (newer scripts have higher versions)
+        content:
+          type: string
+          description: Shell script content
+        is_active:
+          type: boolean
+          description: Whether this version is the active one for the environment
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - version
+      - content
+      - is_active
+      - created_at
+    EnvironmentMcpStdioConfig:
+      type: object
+      description: 'Configuration for an MCP that runs a local subprocess (`transport: stdio`).'
+      properties:
+        command:
+          type: string
+          description: Executable to run (e.g. `npx`)
+        args:
+          type: array
+          items:
+            type: string
+          description: Arguments passed to the command
+        env:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables for the subprocess
+      required:
+      - command
+      - args
+      - env
+    UpdateEnvironmentVariableRequest:
+      type: object
+      description: Request body for updating an environment variable. Only provided fields are changed.
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        personal_override_allowed:
+          type: boolean
+          description: Team/Global variables only. Allows source-backed personal environments to override this inherited key.
+    StartHookTestResult:
+      type: object
+      description: Result of running a start hook script in an isolated sandbox.
+      properties:
+        exit_code:
+          type: integer
+          description: Process exit code (0 = success)
+        output:
+          type: string
+          description: Captured stdout + stderr
+        timed_out:
+          type: boolean
+          description: Whether execution was killed for taking too long
+      required:
+      - exit_code
+      - output
+      - timed_out
+    CreateEnvironmentSkillRequest:
+      type: object
+      description: Request body for enabling a skill on an environment.
+      properties:
+        name:
+          type: string
+          description: Display name (typically copied from the catalog result)
+        slug:
+          type: string
+          description: Catalog slug
+        source:
+          type: string
+          description: Catalog URL or other source identifier
+      required:
+      - name
+      - slug
+      - source
+    GetWarmHooksResponse:
+      type: object
+      properties:
+        warm_hook:
+          oneOf:
+          - $ref: '#/components/schemas/WarmHookRecord'
+          - type: 'null'
+          description: The active warm hook for the environment (null if none has ever been saved).
+        warm_pool:
+          oneOf:
+          - $ref: '#/components/schemas/WarmPoolConfigWithStats'
+          - type: 'null'
+          description: The warm pool config and current counts (null if no pool has been configured).
+      required:
+      - warm_hook
+      - warm_pool
+    TestWarmHookRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Shell script to execute (not persisted)
+      required:
+      - content
+    EnvironmentMcpResponse:
+      type: object
+      properties:
+        environment_mcp:
+          $ref: '#/components/schemas/EnvironmentMcp'
+      required:
+      - environment_mcp
     CreateEnvironmentRequest:
       type: object
       description: Request body for creating a new environment.
@@ -1238,89 +1461,6 @@ components:
           description: Enable mobile testing. Only valid for team environments on Team and Enterprise plans; otherwise returns `PLAN_UPGRADE_REQUIRED`.
       required:
       - name
-    ListEnvironmentFilesResponse:
-      type: object
-      properties:
-        environment_files:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentFile'
-      required:
-      - environment_files
-    WarmHookTestResult:
-      type: object
-      description: Result of running a warm hook script in an isolated sandbox.
-      properties:
-        exit_code:
-          type: integer
-          description: Process exit code (0 = success)
-        output:
-          type: string
-          description: Captured stdout + stderr
-        timed_out:
-          type: boolean
-          description: Whether execution was killed for taking too long
-      required:
-      - exit_code
-      - output
-      - timed_out
-    UpsertWarmPoolConfigResponse:
-      type: object
-      properties:
-        warm_pool:
-          $ref: '#/components/schemas/WarmPoolConfigWithStats'
-      required:
-      - warm_pool
-    GetWarmHooksResponse:
-      type: object
-      properties:
-        warm_hook:
-          oneOf:
-          - $ref: '#/components/schemas/WarmHookRecord'
-          - type: 'null'
-          description: The active warm hook for the environment (null if none has ever been saved).
-        warm_pool:
-          oneOf:
-          - $ref: '#/components/schemas/WarmPoolConfigWithStats'
-          - type: 'null'
-          description: The warm pool config and current counts (null if no pool has been configured).
-      required:
-      - warm_hook
-      - warm_pool
-    RepoSkillFramework:
-      type: string
-      description: Which AI tool owns the discovered file's on-disk convention.
-      enum:
-      - claude
-      - codex
-      - cursor
-      - agents
-    CreateEnvironmentSkillRequest:
-      type: object
-      description: Request body for enabling a skill on an environment.
-      properties:
-        name:
-          type: string
-          description: Display name (typically copied from the catalog result)
-        slug:
-          type: string
-          description: Catalog slug
-        source:
-          type: string
-          description: Catalog URL or other source identifier
-      required:
-      - name
-      - slug
-      - source
-    ListEnvironmentVariablesResponse:
-      type: object
-      properties:
-        environment_variables:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentVariable'
-      required:
-      - environment_variables
     UpdateEnvironmentMcpRequest:
       type: object
       description: Request body for updating an MCP. Only provided fields are changed. When `transport` is changed, `config` is required and must match the new transport's shape.
@@ -1335,136 +1475,23 @@ components:
           - sse
         config:
           $ref: '#/components/schemas/EnvironmentMcpConfig'
-    EnvironmentFileResponse:
+    CreateEnvironmentSkillsRegistryResponse:
       type: object
       properties:
-        environment_file:
-          $ref: '#/components/schemas/EnvironmentFile'
+        registry:
+          $ref: '#/components/schemas/EnvironmentSkillsRegistry'
+        repo_skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoSkill'
+        error:
+          type:
+          - string
+          - 'null'
       required:
-      - environment_file
-    EnvironmentMcpConfig:
-      description: MCP transport-specific configuration. Discriminate by the parent `transport` field.
-      oneOf:
-      - $ref: '#/components/schemas/EnvironmentMcpStdioConfig'
-      - $ref: '#/components/schemas/EnvironmentMcpHttpConfig'
-    UpdateEnvironmentRequest:
-      type: object
-      description: Request body for updating an environment. Only provided fields are changed. `repository_id` and `repository_set_id` remain mutually exclusive when both are supplied.
-      properties:
-        name:
-          type: string
-        description:
-          type:
-          - string
-          - 'null'
-        repository_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        repository_set_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        system_prompt:
-          type:
-          - string
-          - 'null'
-        mobile_testing_enabled:
-          type: boolean
-          description: Enable or disable mobile testing. Only valid on team environments; enabling requires a Team or Enterprise plan and otherwise returns `PLAN_UPGRADE_REQUIRED`.
-        personal_preferences:
-          type:
-          - string
-          - 'null'
-          description: Only settable on personal environments. Appended after the (inherited) system prompt.
-    TestStartHookRequest:
-      type: object
-      properties:
-        content:
-          type: string
-          description: Shell script to execute (not persisted)
-      required:
-      - content
-    WarmHookRecord:
-      type: object
-      description: A warm hook — the shell script that runs while pre-warming workspaces for an environment.
-      properties:
-        id:
-          type: string
-          format: uuid
-        organization_id:
-          type: string
-          format: uuid
-        environment_id:
-          type: string
-          format: uuid
-        version:
-          type: integer
-          description: Monotonic version (newer scripts have higher versions)
-        content:
-          type: string
-          description: Shell script content
-        is_active:
-          type: boolean
-          description: Whether this version is the active one for the environment
-        created_at:
-          type: string
-          format: date-time
-      required:
-      - id
-      - organization_id
-      - environment_id
-      - version
-      - content
-      - is_active
-      - created_at
-    WarmPoolWorkspaceRecord:
-      type: object
-      description: A single pre-warmed workspace within a warm pool.
-      properties:
-        id:
-          type: string
-          format: uuid
-        organization_id:
-          type: string
-          format: uuid
-        warm_pool_config_id:
-          type: string
-          format: uuid
-        sandbox_id:
-          type: string
-          description: Underlying sandbox/VM identifier
-        status:
-          type: string
-          enum:
-          - warming
-          - snapshotting
-          - ready
-          - assigned
-          - expired
-          - failed
-        generation:
-          type: integer
-          description: Config generation this workspace was built for. Less than the parent config's `generation` means stale by derivation.
-        error_message:
-          type:
-          - string
-          - 'null'
-          description: Error message if `status` is `failed`
-        created_at:
-          type: string
-          format: date-time
-      required:
-      - id
-      - organization_id
-      - warm_pool_config_id
-      - sandbox_id
-      - status
-      - generation
-      - error_message
-      - created_at
+      - registry
+      - repo_skills
+      - error
     UpsertWarmPoolConfigRequest:
       type: object
       properties:
@@ -1473,16 +1500,6 @@ components:
           description: Whether the warm pool should be active
       required:
       - enabled
-    SaveStartHookResponse:
-      type: object
-      properties:
-        start_hook:
-          oneOf:
-          - $ref: '#/components/schemas/StartHookRecord'
-          - type: 'null'
-          description: The saved active start hook, or null when the request cleared the active start hook.
-      required:
-      - start_hook
     EnvironmentSkill:
       type: object
       description: A skill enabled on an environment. The membership row, not the catalog entry.
@@ -1520,40 +1537,150 @@ components:
       - source
       - created_at
       - updated_at
-    Error:
+    SaveAndTestWarmHookRequest:
       type: object
       properties:
-        error:
+        content:
           type: string
-          description: Error message
-        details:
+          description: Shell script to save and execute
+      required:
+      - content
+    ListEnvironmentMcpsResponse:
+      type: object
+      properties:
+        environment_mcps:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentMcp'
+      required:
+      - environment_mcps
+    SaveStartHookResponse:
+      type: object
+      properties:
+        start_hook:
+          oneOf:
+          - $ref: '#/components/schemas/StartHookRecord'
+          - type: 'null'
+          description: The saved active start hook, or null when the request cleared the active start hook.
+      required:
+      - start_hook
+    ListEnvironmentFilesResponse:
+      type: object
+      properties:
+        environment_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentFile'
+      required:
+      - environment_files
+    WarmHookTestResult:
+      type: object
+      description: Result of running a warm hook script in an isolated sandbox.
+      properties:
+        exit_code:
+          type: integer
+          description: Process exit code (0 = success)
+        output:
+          type: string
+          description: Captured stdout + stderr
+        timed_out:
+          type: boolean
+          description: Whether execution was killed for taking too long
+      required:
+      - exit_code
+      - output
+      - timed_out
+    CreateEnvironmentVariableRequest:
+      type: object
+      description: Request body for creating an environment variable.
+      properties:
+        key:
+          type: string
+          description: Variable name
+        value:
+          type: string
+          description: Variable value (encrypted at rest)
+        personal_override_allowed:
+          type: boolean
+          description: Team/Global variables only. Allows source-backed personal environments to override this inherited key.
+      required:
+      - key
+      - value
+    SaveWarmHookResponse:
+      type: object
+      properties:
+        warm_hook:
+          $ref: '#/components/schemas/WarmHookRecord'
+      required:
+      - warm_hook
+    ListRepoSkillsResponse:
+      type: object
+      properties:
+        repo_skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/RepoSkill'
+        error:
           type:
           - string
           - 'null'
-          description: Additional error details
+          description: Populated when discovery couldn't run end-to-end (e.g. the bound repo has no GitHub App installation). The list may still be partially filled; the UI shows this as an inline banner rather than a 5xx.
       required:
+      - repo_skills
       - error
-    EnvironmentMcpStdioConfig:
+    UpsertWarmPoolConfigResponse:
       type: object
-      description: 'Configuration for an MCP that runs a local subprocess (`transport: stdio`).'
       properties:
-        command:
-          type: string
-          description: Executable to run (e.g. `npx`)
-        args:
+        warm_pool:
+          $ref: '#/components/schemas/WarmPoolConfigWithStats'
+      required:
+      - warm_pool
+    ListEnvironmentsResponse:
+      type: object
+      properties:
+        environments:
           type: array
           items:
-            type: string
-          description: Arguments passed to the command
-        env:
-          type: object
-          additionalProperties:
-            type: string
-          description: Environment variables for the subprocess
+            $ref: '#/components/schemas/Environment'
       required:
-      - command
-      - args
-      - env
+      - environments
+    EnvironmentVariable:
+      type: object
+      description: An environment variable. Values are encrypted at rest and decrypted on read.
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        key:
+          type: string
+          description: Variable name (e.g. `DATABASE_URL`)
+        value:
+          type: string
+          description: Variable value (returned in plaintext)
+        personal_override_allowed:
+          type: boolean
+          description: Whether source-backed personal environments may override this inherited key
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - organization_id
+      - environment_id
+      - key
+      - value
+      - personal_override_allowed
+      - created_at
+      - updated_at
     EnvironmentMcp:
       type: object
       description: An MCP (Model Context Protocol) server attached to an environment.
@@ -1593,160 +1720,14 @@ components:
       - config
       - created_at
       - updated_at
-    EnvironmentVariable:
-      type: object
-      description: An environment variable. Values are encrypted at rest and decrypted on read.
-      properties:
-        id:
-          type: string
-          format: uuid
-        organization_id:
-          type: string
-          format: uuid
-        environment_id:
-          type: string
-          format: uuid
-        key:
-          type: string
-          description: Variable name (e.g. `DATABASE_URL`)
-        value:
-          type: string
-          description: Variable value (returned in plaintext)
-        personal_override_allowed:
-          type: boolean
-          description: Whether source-backed personal environments may override this inherited key
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-      required:
-      - id
-      - organization_id
-      - environment_id
-      - key
-      - value
-      - personal_override_allowed
-      - created_at
-      - updated_at
-    SearchEnvironmentSkillsResponse:
+    TestStartHookRequest:
       type: object
       properties:
-        skills:
-          type: array
-          items:
-            $ref: '#/components/schemas/SearchSkill'
-      required:
-      - skills
-    SuccessResponse:
-      type: object
-      description: Generic success response.
-      properties:
-        success:
-          type: boolean
-      required:
-      - success
-    EnvironmentMcpResponse:
-      type: object
-      properties:
-        environment_mcp:
-          $ref: '#/components/schemas/EnvironmentMcp'
-      required:
-      - environment_mcp
-    SaveWarmHookResponse:
-      type: object
-      properties:
-        warm_hook:
-          $ref: '#/components/schemas/WarmHookRecord'
-      required:
-      - warm_hook
-    RepoSkill:
-      type: object
-      description: 'A skill/agent/command/prompt file discovered inside the environment''s bound repo. Distinct from `EnvironmentSkill`: these are inferred live from the repo''s git tree, are read-only, and have no DB row.'
-      properties:
-        id:
-          type: string
-          description: Stable id, formed from the repository UUID and the in-repo path.
-        repository_id:
-          type: string
-          format: uuid
-        repository_full_name:
-          type: string
-          description: Repo's `owner/name` (denormalized for the UI).
-        branch:
-          type: string
-          description: Default branch the file was resolved against.
-        path:
-          type: string
-          description: Repo-relative path of the discovered file or skill directory.
-        name:
-          type: string
-          description: Human-friendly name (from YAML frontmatter when present, otherwise the filename or directory).
-        description:
-          type:
-          - string
-          - 'null'
-          description: Single-line description, populated from frontmatter when available.
-        framework:
-          $ref: '#/components/schemas/RepoSkillFramework'
-        kind:
-          type: string
-          description: Sub-kind within the framework.
-          enum:
-          - skill
-          - agent
-          - command
-          - prompt
-          - plugin
-        html_url:
-          type: string
-          format: uri
-          description: Direct GitHub blob link.
-      required:
-      - id
-      - repository_id
-      - repository_full_name
-      - branch
-      - path
-      - name
-      - description
-      - framework
-      - kind
-      - html_url
-    StartHookRecord:
-      type: object
-      description: A start hook — the shell script that runs at workspace boot (after the warm sandbox is claimed) for an environment.
-      properties:
-        id:
-          type: string
-          format: uuid
-        organization_id:
-          type: string
-          format: uuid
-        environment_id:
-          type: string
-          format: uuid
-        version:
-          type: integer
-          description: Monotonic version (newer scripts have higher versions)
         content:
           type: string
-          description: Shell script content
-        is_active:
-          type: boolean
-          description: Whether this version is the active one for the environment
-        created_at:
-          type: string
-          format: date-time
+          description: Shell script to execute (not persisted)
       required:
-      - id
-      - organization_id
-      - environment_id
-      - version
       - content
-      - is_active
-      - created_at
     SaveAndTestWarmHookResponse:
       type: object
       properties:
@@ -1757,23 +1738,6 @@ components:
       required:
       - warm_hook
       - test
-    StartHookTestResult:
-      type: object
-      description: Result of running a start hook script in an isolated sandbox.
-      properties:
-        exit_code:
-          type: integer
-          description: Process exit code (0 = success)
-        output:
-          type: string
-          description: Captured stdout + stderr
-        timed_out:
-          type: boolean
-          description: Whether execution was killed for taking too long
-      required:
-      - exit_code
-      - output
-      - timed_out
     EnvironmentSkillsRegistry:
       type: object
       description: A GitHub repository registered as a skill registry on an environment.
@@ -1812,13 +1776,23 @@ components:
       - default_branch
       - created_at
       - updated_at
-    EnvironmentResponse:
+    ListEnvironmentSkillsResponse:
       type: object
       properties:
-        environment:
-          $ref: '#/components/schemas/Environment'
+        environment_skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentSkill'
       required:
-      - environment
+      - environment_skills
+    SuccessResponse:
+      type: object
+      description: Generic success response.
+      properties:
+        success:
+          type: boolean
+      required:
+      - success
     WarmPoolConfigWithStats:
       type: object
       description: Warm pool configuration plus current pool counts.
@@ -1908,56 +1882,31 @@ components:
       - snapshotting_count
       - last_failure_at
       - last_failure_reason
-    SaveAndTestWarmHookRequest:
+    UpdateEnvironmentFileRequest:
       type: object
-      properties:
-        content:
-          type: string
-          description: Shell script to save and execute
-      required:
-      - content
-    EnvironmentVariableResponse:
-      type: object
-      properties:
-        environment_variable:
-          $ref: '#/components/schemas/EnvironmentVariable'
-      required:
-      - environment_variable
-    CreateEnvironmentFileRequest:
-      type: object
-      description: Request body for creating an environment file. Maximum content size is 64 KB (65,536 bytes).
+      description: Request body for updating an environment file. Only provided fields are changed.
       properties:
         name:
           type: string
         path:
           type: string
-          description: Destination path inside the workspace, e.g. `~/AGENTS.md`
         content:
           type: string
-          description: File contents (≤ 64 KB)
-      required:
-      - name
-      - path
-      - content
-    ListEnvironmentMcpsResponse:
+    EnvironmentResponse:
       type: object
       properties:
-        environment_mcps:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentMcp'
+        environment:
+          $ref: '#/components/schemas/Environment'
       required:
-      - environment_mcps
-    GetStartHooksResponse:
-      type: object
-      properties:
-        start_hook:
-          oneOf:
-          - $ref: '#/components/schemas/StartHookRecord'
-          - type: 'null'
-          description: The active start hook for the environment (null if none has ever been saved).
-      required:
-      - start_hook
+      - environment
+    RepoSkillFramework:
+      type: string
+      description: Which AI tool owns the discovered file's on-disk convention.
+      enum:
+      - claude
+      - codex
+      - cursor
+      - agents
     CreateEnvironmentMcpRequest:
       type: object
       description: Request body for creating an MCP. The `config` shape must match the chosen `transport`.
@@ -1977,38 +1926,98 @@ components:
       - name
       - transport
       - config
-    SaveWarmHookRequest:
+    EnvironmentFile:
       type: object
+      description: A file dropped into the workspace at the configured `path` when the workspace is provisioned.
       properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        environment_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Human-readable name
+        path:
+          type: string
+          description: Destination path inside the workspace (typically under `~/`)
         content:
           type: string
-          description: Shell script to persist and activate
+          description: File contents (≤ 64 KB)
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
       required:
+      - id
+      - organization_id
+      - environment_id
+      - name
+      - path
       - content
-    CreateEnvironmentSkillsRegistryResponse:
+      - created_at
+      - updated_at
+    SearchSkill:
       type: object
+      description: A skill catalog search result.
       properties:
-        registry:
-          $ref: '#/components/schemas/EnvironmentSkillsRegistry'
-        repo_skills:
-          type: array
-          items:
-            $ref: '#/components/schemas/RepoSkill'
-        error:
-          type:
-          - string
-          - 'null'
+        name:
+          type: string
+        slug:
+          type: string
+        source:
+          type: string
+        installs:
+          type: integer
+          description: Approximate install count from the catalog
       required:
-      - registry
-      - repo_skills
-      - error
-    TestStartHookResponse:
+      - name
+      - slug
+      - source
+      - installs
+    TestWarmHookResponse:
       type: object
       properties:
         test:
-          $ref: '#/components/schemas/StartHookTestResult'
+          $ref: '#/components/schemas/WarmHookTestResult'
       required:
       - test
+    EnvironmentMcpConfig:
+      description: MCP transport-specific configuration. Discriminate by the parent `transport` field.
+      oneOf:
+      - $ref: '#/components/schemas/EnvironmentMcpStdioConfig'
+      - $ref: '#/components/schemas/EnvironmentMcpHttpConfig'
+    EnvironmentSkillResponse:
+      type: object
+      properties:
+        environment_skill:
+          $ref: '#/components/schemas/EnvironmentSkill'
+      required:
+      - environment_skill
+    EnvironmentSkillsRegistryWithContents:
+      type: object
+      description: A skill registry with its discovered skills.
+      allOf:
+      - $ref: '#/components/schemas/EnvironmentSkillsRegistry'
+      - type: object
+        properties:
+          repo_skills:
+            type: array
+            items:
+              $ref: '#/components/schemas/RepoSkill'
+          error:
+            type:
+            - string
+            - 'null'
+        required:
+        - repo_skills
+        - error
     SaveStartHookRequest:
       type: object
       properties:
@@ -2017,43 +2026,46 @@ components:
           description: Shell script to persist and activate. Empty content clears the active start hook.
       required:
       - content
-    ListEnvironmentSkillsRegistriesResponse:
+    EnvironmentFileResponse:
       type: object
       properties:
-        registries:
+        environment_file:
+          $ref: '#/components/schemas/EnvironmentFile'
+      required:
+      - environment_file
+    ListWarmPoolWorkspacesResponse:
+      type: object
+      properties:
+        workspaces:
           type: array
           items:
-            $ref: '#/components/schemas/EnvironmentSkillsRegistryWithContents'
+            $ref: '#/components/schemas/WarmPoolWorkspaceRecord'
       required:
-      - registries
-    ListEnvironmentSkillsResponse:
+      - workspaces
+    EnvironmentVariableResponse:
       type: object
       properties:
-        environment_skills:
-          type: array
-          items:
-            $ref: '#/components/schemas/EnvironmentSkill'
+        environment_variable:
+          $ref: '#/components/schemas/EnvironmentVariable'
       required:
-      - environment_skills
-    ListEnvironmentsResponse:
+      - environment_variable
+    SaveWarmHookRequest:
       type: object
       properties:
-        environments:
-          type: array
-          items:
-            $ref: '#/components/schemas/Environment'
-      required:
-      - environments
-    UpdateEnvironmentFileRequest:
-      type: object
-      description: Request body for updating an environment file. Only provided fields are changed.
-      properties:
-        name:
-          type: string
-        path:
-          type: string
         content:
           type: string
+          description: Shell script to persist and activate
+      required:
+      - content
+    ListEnvironmentVariablesResponse:
+      type: object
+      properties:
+        environment_variables:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentVariable'
+      required:
+      - environment_variables
     Environment:
       type: object
       description: 'An environment — the config bundle workspaces are created from. Holds an optional repository binding plus the runtime variables, files, skills, MCPs, and warm hook applied to every workspace built from it. Every organization has a singleton Global environment (`is_global: true`) whose values are layered onto every other environment. Personal environments have `user_id` set and are visible only to their owner. Source-backed personal environments expose source-derived repository binding and system prompt values while keeping the source link in `source_environment_id`.'
@@ -2147,111 +2159,45 @@ components:
       - source_environment_id
       - created_at
       - updated_at
-    SearchSkill:
+    TestStartHookResponse:
       type: object
-      description: A skill catalog search result.
       properties:
-        name:
-          type: string
-        slug:
-          type: string
-        source:
-          type: string
-        installs:
-          type: integer
-          description: Approximate install count from the catalog
+        test:
+          $ref: '#/components/schemas/StartHookTestResult'
       required:
-      - name
-      - slug
-      - source
-      - installs
-    ListWarmPoolWorkspacesResponse:
+      - test
+    Error:
       type: object
       properties:
-        workspaces:
-          type: array
-          items:
-            $ref: '#/components/schemas/WarmPoolWorkspaceRecord'
-      required:
-      - workspaces
-    ListRepoSkillsResponse:
-      type: object
-      properties:
-        repo_skills:
-          type: array
-          items:
-            $ref: '#/components/schemas/RepoSkill'
         error:
+          type: string
+          description: Error message
+        details:
           type:
           - string
           - 'null'
-          description: Populated when discovery couldn't run end-to-end (e.g. the bound repo has no GitHub App installation). The list may still be partially filled; the UI shows this as an inline banner rather than a 5xx.
+          description: Additional error details
       required:
-      - repo_skills
       - error
-    CreateEnvironmentVariableRequest:
+    CreateEnvironmentFileRequest:
       type: object
-      description: Request body for creating an environment variable.
+      description: Request body for creating an environment file. Maximum content size is 64 KB (65,536 bytes).
       properties:
-        key:
+        name:
           type: string
-          description: Variable name
-        value:
+        path:
           type: string
-          description: Variable value (encrypted at rest)
-        personal_override_allowed:
-          type: boolean
-          description: Team/Global variables only. Allows source-backed personal environments to override this inherited key.
-      required:
-      - key
-      - value
-    EnvironmentSkillResponse:
-      type: object
-      properties:
-        environment_skill:
-          $ref: '#/components/schemas/EnvironmentSkill'
-      required:
-      - environment_skill
-    UpdateEnvironmentVariableRequest:
-      type: object
-      description: Request body for updating an environment variable. Only provided fields are changed.
-      properties:
-        key:
-          type: string
-        value:
-          type: string
-        personal_override_allowed:
-          type: boolean
-          description: Team/Global variables only. Allows source-backed personal environments to override this inherited key.
-    TestWarmHookRequest:
-      type: object
-      properties:
+          description: Destination path inside the workspace, e.g. `~/AGENTS.md`
         content:
           type: string
-          description: Shell script to execute (not persisted)
+          description: File contents (≤ 64 KB)
       required:
+      - name
+      - path
       - content
-    EnvironmentSkillsRegistryWithContents:
+    WarmPoolWorkspaceRecord:
       type: object
-      description: A skill registry with its discovered skills.
-      allOf:
-      - $ref: '#/components/schemas/EnvironmentSkillsRegistry'
-      - type: object
-        properties:
-          repo_skills:
-            type: array
-            items:
-              $ref: '#/components/schemas/RepoSkill'
-          error:
-            type:
-            - string
-            - 'null'
-        required:
-        - repo_skills
-        - error
-    EnvironmentFile:
-      type: object
-      description: A file dropped into the workspace at the configured `path` when the workspace is provisioned.
+      description: A single pre-warmed workspace within a warm pool.
       properties:
         id:
           type: string
@@ -2259,40 +2205,94 @@ components:
         organization_id:
           type: string
           format: uuid
-        environment_id:
+        warm_pool_config_id:
           type: string
           format: uuid
-        name:
+        sandbox_id:
           type: string
-          description: Human-readable name
-        path:
+          description: Underlying sandbox/VM identifier
+        status:
           type: string
-          description: Destination path inside the workspace (typically under `~/`)
-        content:
-          type: string
-          description: File contents (≤ 64 KB)
+          enum:
+          - warming
+          - snapshotting
+          - ready
+          - assigned
+          - expired
+          - failed
+        generation:
+          type: integer
+          description: Config generation this workspace was built for. Less than the parent config's `generation` means stale by derivation.
+        error_message:
+          type:
+          - string
+          - 'null'
+          description: Error message if `status` is `failed`
         created_at:
-          type: string
-          format: date-time
-        updated_at:
           type: string
           format: date-time
       required:
       - id
       - organization_id
-      - environment_id
-      - name
-      - path
-      - content
+      - warm_pool_config_id
+      - sandbox_id
+      - status
+      - generation
+      - error_message
       - created_at
-      - updated_at
-    TestWarmHookResponse:
+    RepoSkill:
       type: object
+      description: 'A skill/agent/command/prompt file discovered inside the environment''s bound repo. Distinct from `EnvironmentSkill`: these are inferred live from the repo''s git tree, are read-only, and have no DB row.'
       properties:
-        test:
-          $ref: '#/components/schemas/WarmHookTestResult'
+        id:
+          type: string
+          description: Stable id, formed from the repository UUID and the in-repo path.
+        repository_id:
+          type: string
+          format: uuid
+        repository_full_name:
+          type: string
+          description: Repo's `owner/name` (denormalized for the UI).
+        branch:
+          type: string
+          description: Default branch the file was resolved against.
+        path:
+          type: string
+          description: Repo-relative path of the discovered file or skill directory.
+        name:
+          type: string
+          description: Human-friendly name (from YAML frontmatter when present, otherwise the filename or directory).
+        description:
+          type:
+          - string
+          - 'null'
+          description: Single-line description, populated from frontmatter when available.
+        framework:
+          $ref: '#/components/schemas/RepoSkillFramework'
+        kind:
+          type: string
+          description: Sub-kind within the framework.
+          enum:
+          - skill
+          - agent
+          - command
+          - prompt
+          - plugin
+        html_url:
+          type: string
+          format: uri
+          description: Direct GitHub blob link.
       required:
-      - test
+      - id
+      - repository_id
+      - repository_full_name
+      - branch
+      - path
+      - name
+      - description
+      - framework
+      - kind
+      - html_url
     EnvironmentMcpHttpConfig:
       type: object
       description: 'Configuration for an MCP reached over HTTP or SSE (`transport: http` or `transport: sse`).'
@@ -2310,20 +2310,14 @@ components:
       - url
       - headers
   responses:
-    Conflict:
-      description: Conflict - Resource already exists or operation conflicts with current state
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    Unauthorized:
-      description: Unauthorized - Invalid or missing API key
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     BadRequest:
       description: Bad request - Missing or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
       content:
         application/json:
           schema:
@@ -2334,8 +2328,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    NotFound:
-      description: Resource not found
+    Conflict:
+      description: Conflict - Resource already exists or operation conflicts with current state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
       content:
         application/json:
           schema:
