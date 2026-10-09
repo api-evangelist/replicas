@@ -1,0 +1,107 @@
+# Pricing transcribed from the provider's own page — see provenance. Numbers are quoted, not derived.
+generated: '2026-10-07'
+method: searched
+source: https://replicas.dev/pricing
+sources:
+- https://replicas.dev/pricing
+- https://tryreplicas.com/pricing
+provenance:
+  tool: all/0-working/economics/harvest_pricing.py
+  run: 20261007T104522
+  grounding: every price_text was found verbatim in the fetched page text
+audience: business-product
+pricing_basis: per-seat
+delivery:
+  delivery: managed
+  method: page
+  read: '2026-10-07'
+published: true
+note: Team plan mixes Full seats ($200/mo) and Flex pay-as-you-go ($0.016/min); 14-day free trial, no
+  card required.
+plan_count: 5
+currency: USD
+plans:
+- name: Full seat
+  price_text: Unlimited manual usage · $200/mo
+  price: 200
+  currency: USD
+  period: month
+  unit: seat
+  included_quota: Unlimited manual usage
+- name: Flex
+  price_text: Pay as you go · $0.016/min
+  price: 0.016
+  currency: USD
+  period: per-use
+  unit: minute
+- name: Developer
+  price_text: $50/mo
+  price: 50
+  currency: USD
+  period: month
+  unit: individual
+  included_quota: 150 hours per month; API and automations billed by usage
+- name: Team
+  price_text: $200/mo
+  price: 200
+  currency: USD
+  period: month
+  unit: Per Full seat
+  included_quota: Unlimited manual workspace minutes; API and automations billed by usage
+- name: Enterprise
+  price_text: Custom
+  period: none
+  included_quota: Unlimited manual and automated workspace minutes
+rate_limit_statements:
+- Higher API rate limits
+- Custom rate limits
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - hybrid
+  - seat
+  - subscription
+  units:
+  - compute
+  - seat
+  plans:
+  - name: Full seat
+    access: other
+    model: seat
+    model_how: derived
+    units:
+    - seat
+    periods:
+    - month
+  - name: Flex
+    access: other
+    model: hybrid
+    model_how: derived
+    units:
+    - compute
+    periods:
+    - other
+  - name: Developer
+    access: other
+    model: subscription
+    model_how: derived
+    units:
+    - other
+    periods:
+    - month
+  - name: Team
+    access: other
+    model: seat
+    model_how: derived
+    units:
+    - seat
+    periods:
+    - month
+  - name: Enterprise
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods:
+    - none
