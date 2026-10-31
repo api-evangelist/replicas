@@ -64,6 +64,118 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Replicas is a company surfaced as a portfolio company of y-combinator and added to the API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+Replicas (tryreplicas.com), a Y Combinator (Spring 2026) company, runs end-to-end background coding agents in isolated cloud sandboxes. Teams delegate engineering tasks - from Slack, Linear, GitHub, GitLab, Sentry, the web dashboard, a CLI, or a native macOS app - to frontier coding agents (Claude Code, Codex, Cursor, OpenCode) that work in their own VM-backed workspaces with databases, environment variables, files, skills, and MCP servers, then open pull requests for review. The Replica API (OpenAPI 3.1, base https://api.tryreplicas.com/v1, bearer API-key auth) exposes environments, replicas/workspaces, chats, event streaming (SSE), repositories, automations (cron + webhook triggered), and Google Search Console tooling, plus an official hosted MCP server at api.tryreplicas.com/v1/mcp.
 
-Backed by: y-combinator
+**Areas:** Company · Artificial Intelligence · Coding Agents · Developer Tools · Automation · Cloud Workspaces · MCP · DevOps
+
+## Replicas on APIs.io
+
+Everything profiled for Replicas is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/replicas/](https://apis.io/providers/replicas/)** — or go straight to one of the APIs or properties below.
+
+### APIs (13)
+
+- [Replicas Analytics API](https://apis.io/apis/replicas/replicas-analytics-api/) — Read aggregated activity and usage metrics for your organization: compute minutes, workspaces created by source, and pull request throughput over a time range.
+- [Replicas API Keys API](https://apis.io/apis/replicas/replicas-api-keys-api/) — The API Keys API from Replicas — 2 operation(s) for api keys.
+- [Replicas Automation API](https://apis.io/apis/replicas/replicas-automation-api/) — Create and manage automations that trigger replicas on a schedule or in response to events
+- [Replicas Credentials API](https://apis.io/apis/replicas/replicas-credentials-api/) — Manage coding-agent credentials for an organization or the authenticated user
+- [Replicas Downloads API](https://apis.io/apis/replicas/replicas-downloads-api/) — Download Replicas applications
+- [Replicas Environments API](https://apis.io/apis/replicas/replicas-environments-api/) — Manage environments — the primitive that workspaces are created from. Variables, files, skills, MCPs, warm-hooks, and warm-pools are all scoped to an…
+- [Replicas Google Search Console API](https://apis.io/apis/replicas/replicas-google-search-console-api/) — Read Search Console properties, performance, sitemaps, and URL inspection results through a connected Google account
+- [Replicas Preview API](https://apis.io/apis/replicas/replicas-preview-api/) — Manage public preview URLs for workspace ports
+- [Replicas Profile API](https://apis.io/apis/replicas/replicas-profile-api/) — Read and update the authenticated user's profile
+- [Replicas Replica API](https://apis.io/apis/replicas/replicas-replica-api/) — Manage replicas (workspaces) for AI agents
+- [Replicas Repository API](https://apis.io/apis/replicas/replicas-repository-api/) — Read repositories and repository sets connected to your organization. Repositories are the underlying GitHub-connection layer; bind them to an environment…
+- [Replicas Slack API](https://apis.io/apis/replicas/replicas-slack-api/) — Route Slack threads to Replicas workspaces
+- [Replicas Terminal API](https://apis.io/apis/replicas/replicas-terminal-api/) — Manage interactive terminal sessions in active workspaces
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Replicas Webhooks](https://apis.io/asyncapis/replicas/replicas-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [replicas](https://apis.io/servers/replicas/replicas/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Replicas Agentic Access](https://apis.io/agentic-access/replicas/replicas-agentic-access/)
+
+#### Collections (12)
+
+Postman and Open Collection request collections.
+
+- [Replica Analytics API](https://apis.io/collections/replicas/open-replicas-analytics-api/)
+- [Replica Analytics API Keys API](https://apis.io/collections/replicas/open-replicas-api-keys-api/)
+- [Replica Analytics Automation API](https://apis.io/collections/replicas/open-replicas-automation-api/)
+- [Replica Analytics Credentials API](https://apis.io/collections/replicas/open-replicas-credentials-api/)
+- [Replica Analytics Downloads API](https://apis.io/collections/replicas/open-replicas-downloads-api/)
+- [Replica Analytics Environments API](https://apis.io/collections/replicas/open-replicas-environments-api/)
+- [Replica Analytics Google Search Console API](https://apis.io/collections/replicas/open-replicas-google-search-console-api/)
+- [Replica Analytics Profile API](https://apis.io/collections/replicas/open-replicas-profile-api/)
+- [Analytics Replica API](https://apis.io/collections/replicas/open-replicas-replica-api/)
+- [Replica Analytics Repository API](https://apis.io/collections/replicas/open-replicas-repository-api/)
+- [Replica Analytics Slack API](https://apis.io/collections/replicas/open-replicas-slack-api/)
+- [Replica Analytics Terminal API](https://apis.io/collections/replicas/open-replicas-terminal-api/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Replicas Openapi Overlay](https://apis.io/overlays/replicas/replicas-openapi-overlay/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Replicas Authentication](https://apis.io/security/replicas/replicas-authentication/)
+- [Replicas Domain Security](https://apis.io/security/replicas/replicas-domain-security/)
+- [Replicas Vulnerability Disclosure](https://apis.io/security/replicas/replicas-vulnerability-disclosure/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Replicas Plans Pricing](https://apis.io/plans/replicas/replicas-plans-pricing/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Documentation](https://docs.tryreplicas.com)
+- [Getting started](https://docs.tryreplicas.com/features/api)
+- [API reference](https://docs.tryreplicas.com/api-reference)
+- [Pricing](https://tryreplicas.com/pricing)
+- [Sign up](https://tryreplicas.com/auth)
+- [Changelog](https://docs.tryreplicas.com/changelog)
+- [Blog](https://tryreplicas.com/blog)
+- [Security](https://tryreplicas.com/responsible-disclosure)
+- [Terms of service](https://tryreplicas.com/terms)
+- [Privacy policy](https://tryreplicas.com/privacy)
+
+## API Evangelist rating
+
+**Unrated** — no public website could be reached for this company, so there was almost nothing to measure and nothing a reader could check.
+
+This is not a score of zero. No rating is published for this company. If that is wrong because something public exists that we missed, say so on this repository or email [info@apievangelist.com](mailto:info@apievangelist.com) and it will be re-run — free, and no justification needed.
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Replicas: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/replicas/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
